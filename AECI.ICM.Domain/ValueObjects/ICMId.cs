@@ -12,7 +12,9 @@ namespace AECI.ICM.Domain.ValueObjects
         public ICMId(int value)
         {
             if (value < 0)
-                throw new ArgumentNullException(nameof(value), "ICM Id cannot be less than zero");
+                throw new ArgumentNullException(
+                    nameof(value), 
+                    "ICM Id cannot be less than zero");
 
             Value = value;
         }

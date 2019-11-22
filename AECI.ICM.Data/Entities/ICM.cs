@@ -11,6 +11,7 @@ namespace AECI.ICM.Data.Entities
         public bool BranchManager { get; set; } = true;
         public bool RegionalAccountant { get; set; } = true;
         public bool FinanceFunctionCheck { get; set; } = true;
+        public string Comments { get; set; }
 
         public SectionDetail SectionDetail { get; set; }
 

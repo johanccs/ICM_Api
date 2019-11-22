@@ -1,9 +1,13 @@
-﻿using AECI.ICM.IoC;
+﻿using AECI.ICM.Application.Interfaces;
+using AECI.ICM.Application.Services;
+using AECI.ICM.IoC;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Serialization;
 
 namespace AECI.ICM.Api
 {
@@ -19,9 +23,12 @@ namespace AECI.ICM.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAutoMapper(typeof(Startup));
             services.RegisterServices(Configuration);
             services.ConfigureServices();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+                .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -32,7 +39,9 @@ namespace AECI.ICM.Api
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors("Cors");
+            //app.UseCors("Cors");
+
+            app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseMvc();
         }
     }

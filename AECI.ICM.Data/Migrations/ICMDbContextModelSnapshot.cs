@@ -27,6 +27,8 @@ namespace AECI.ICM.Data.Migrations
 
                     b.Property<bool>("BranchManager");
 
+                    b.Property<string>("Comments");
+
                     b.Property<string>("ControlStatement");
 
                     b.Property<bool>("FinanceFunctionCheck");
@@ -57,11 +59,60 @@ namespace AECI.ICM.Data.Migrations
                     b.ToTable("SectionDetail");
                 });
 
+            modelBuilder.Entity("AECI.ICM.Data.Entities.Setting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("EnableWarning");
+
+                    b.Property<string>("SignatureLocation");
+
+                    b.Property<DateTime>("WarningCuttOffDate");
+
+                    b.Property<string>("WarningEmail");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Settings");
+                });
+
+            modelBuilder.Entity("AECI.ICM.Data.Entities.SettingEmail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("BranchManagerEmail");
+
+                    b.Property<string>("BranchManagerName");
+
+                    b.Property<string>("RegionalAccountantEmail");
+
+                    b.Property<string>("RegionalAccountantName");
+
+                    b.Property<int?>("SettingId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SettingId");
+
+                    b.ToTable("SettingEmails");
+                });
+
             modelBuilder.Entity("AECI.ICM.Data.Entities.ICM", b =>
                 {
                     b.HasOne("AECI.ICM.Data.Entities.SectionDetail", "SectionDetail")
                         .WithMany()
                         .HasForeignKey("SectionDetailId");
+                });
+
+            modelBuilder.Entity("AECI.ICM.Data.Entities.SettingEmail", b =>
+                {
+                    b.HasOne("AECI.ICM.Data.Entities.Setting")
+                        .WithMany("Emails")
+                        .HasForeignKey("SettingId");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AECI.ICM.Domain.Interfaces;
-using Microsoft.AspNetCore.Http;
+﻿using AECI.ICM.Domain.Interfaces;
+using AECI.ICM.Shared.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace AECI.ICM.Api.Controllers
 {
@@ -14,7 +15,7 @@ namespace AECI.ICM.Api.Controllers
     {
         #region Readonly Fields
 
-        private readonly IICMService _icmService;
+        private readonly IICMService _icmService;      
 
         #endregion
 
@@ -23,11 +24,12 @@ namespace AECI.ICM.Api.Controllers
         public ICMController(IICMService icmService)
         {
             _icmService = icmService;
+          
         }
 
         #endregion
 
-        #region MEthods
+        #region Methods
 
         [HttpGet]
         public IActionResult Get()
@@ -40,12 +42,59 @@ namespace AECI.ICM.Api.Controllers
                     return NotFound("No ICM Records found");
                 else
                     return Ok(result);
-
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost]       
+        public async Task<IActionResult> Post(ResponseViewModel args)
+        {
+            HttpResponseMessage response = null;
+            args.BMSigPath = @"C:\TestReports\bmSig.png";
+            args.FinSigPath = @"C:\TestReports\bmSig.png";
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("http://localhost:62176/");
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(
+                                    new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(
+                                    "application/json"));
+
+                    var serialised = JsonConvert.SerializeObject(args);
+                    var param = new StringContent(serialised, Encoding.UTF8, "application/json");
+
+                    response = await client.PostAsync("api/Print/PrintReport", param);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var path = response.Content.ReadAsStringAsync().Result;
+                        //var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
+
+                        return Ok(path);
+                    }
+                    else
+                    {
+                        return BadRequest("Print Service not Running");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("getPdf")]
+        public HttpResponseMessage GetPdf()
+        {
+            return null;
         }
 
         #endregion
