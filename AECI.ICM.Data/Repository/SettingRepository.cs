@@ -97,7 +97,7 @@ namespace AECI.ICM.Data.Repository
                 }
                 _ctx.SaveChanges();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

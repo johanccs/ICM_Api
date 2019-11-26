@@ -16,9 +16,10 @@ namespace AECI.ICM.Data.Context
         #region Properties
 
         public DbSet<Entities.ICM> ICM { get; set; }
-        public DbSet<Entities.SectionDetail> SectionDetail{ get; set; }
+        public DbSet<SectionDetail> SectionDetail{ get; set; }
         public DbSet<Setting> Settings { get; set; }
         public DbSet<SettingEmail> SettingEmails { get; set; }
+        public DbSet<Result> Results { get; set; }
 
         #endregion
 

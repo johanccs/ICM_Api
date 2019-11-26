@@ -6,11 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ViewModels\" />
+    <Compile Remove="ViewModels\**" />
+    <EmbeddedResource Remove="ViewModels\**" />
+    <None Remove="ViewModels\**" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AECI.ICM.Domain\AECI.ICM.Domain.csproj" />
+    <ProjectReference Include="..\AECI.ICM.Shared\AECI.ICM.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace AECI.ICM.Application.Interfaces
+﻿namespace MonitorService.Interfaces
 {
     public interface IExceptionMonitor
     {

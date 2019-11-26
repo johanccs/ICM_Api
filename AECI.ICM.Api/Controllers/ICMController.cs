@@ -1,4 +1,5 @@
-﻿using AECI.ICM.Domain.Interfaces;
+﻿using AECI.ICM.Domain.Entities;
+using AECI.ICM.Domain.Interfaces;
 using AECI.ICM.Shared.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -58,6 +59,8 @@ namespace AECI.ICM.Api.Controllers
 
             try
             {
+                _icmService.Add(args);
+
                 using (var client = new HttpClient())
                 {
                     client.BaseAddress = new Uri("http://localhost:62176/");
@@ -83,6 +86,38 @@ namespace AECI.ICM.Api.Controllers
                         return BadRequest("Print Service not Running");
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("PostNewICM")]
+        public IActionResult PostNewICM(ICMViewModel entity)
+        {
+            try
+            {
+                _icmService.Add(entity);
+
+                return Ok(0);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut]
+        [Route("UpdateExistICM")]
+        public IActionResult UpdateExistICM(ICMViewModel entity)
+        {
+            try
+            {
+                _icmService.Add(entity);
+
+                return Ok(0);
             }
             catch (Exception ex)
             {

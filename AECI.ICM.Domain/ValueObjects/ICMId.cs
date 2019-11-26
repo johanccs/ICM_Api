@@ -23,6 +23,8 @@ namespace AECI.ICM.Domain.ValueObjects
 
         #region Methods
 
+        public int GetId() => Value;
+
         public override string ToString()
         {
             return Value.ToString();

@@ -41,7 +41,7 @@ namespace AECI.ICM.PrintReports.Controllers
         {
             var report = new arICM();
             report.lblBranch.Text = param.Branch;
-            report.lblDate.Text = param.Date;
+            report.lblDate.Text = param.Date.ToShortDateString();
             report.lblMonth.Text = param.Month;
             report.pictLogo.Image = System.Drawing.Image.FromFile(imgPath);
             report.pictLogo.SizeMode = GrapeCity.ActiveReports.SectionReportModel.SizeModes.Zoom;
@@ -53,7 +53,7 @@ namespace AECI.ICM.PrintReports.Controllers
             report.lblGenComments.Text = param.GenComments;
             report.lblBMName.Text = param.BMName;
             report.lblFinName.Text = param.FinName;
-            report.lblSignedDate.Text = param.DateSigned;
+            report.lblSignedDate.Text = param.DateSigned.ToShortDateString();
 
             return report;
         }

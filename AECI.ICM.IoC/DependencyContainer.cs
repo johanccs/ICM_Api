@@ -18,8 +18,9 @@ namespace AECI.ICM.IoC
             services.AddScoped<IICMRepository, ICMRepository>();
             services.AddScoped<ISettingsService, SettingsService>();
             services.AddScoped<ISettingRepository, SettingRepository>();
-            services.AddSingleton<IExceptionMonitor, ExceptionMonitor>();
-
+            services.AddScoped<IResultService, ResultService>();
+            services.AddScoped<IResultRepository, ResultRepository>();
+          
             services.AddDbContext<ICMDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DBCtx"));

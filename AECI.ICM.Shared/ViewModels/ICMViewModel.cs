@@ -10,5 +10,6 @@
         public string SectionName { get; set; }
         public string Comments { get; set; }
         public string CtrlEffectiveness { get; set; }
+        public int Id { get; set; }
     }
 }

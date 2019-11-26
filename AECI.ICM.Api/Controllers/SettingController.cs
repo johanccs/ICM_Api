@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AECI.ICM.Api.ViewModels;
+﻿using AECI.ICM.Api.ViewModels;
 using AECI.ICM.Application.Interfaces;
 using AECI.ICM.Domain.Entities;
 using AECI.ICM.Domain.ValueObjects;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace AECI.ICM.Api.Controllers
 {
