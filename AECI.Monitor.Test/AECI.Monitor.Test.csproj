@@ -72,6 +72,10 @@
       <Project>{F2A76076-F8F3-4B54-B24B-FC30F5B6AEC3}</Project>
       <Name>MonitorService</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AECI.ICM.Shared\AECI.ICM.Shared.csproj">
+      <Project>{e8632689-5c07-488a-ac9a-82d4ec95c64f}</Project>
+      <Name>AECI.ICM.Shared</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

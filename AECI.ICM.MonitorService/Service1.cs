@@ -15,8 +15,7 @@ namespace MonitorService
         #endregion
 
         #region Fields
-
-        private EventLog eventlog;
+       
         private Timer timer = new Timer();
 
         #endregion
@@ -27,8 +26,7 @@ namespace MonitorService
         {
             InitializeComponent();
 
-            //Debugger.Launch();
-
+            Debugger.Launch();
            
             //eventlog = new EventLog();
             //if (!EventLog.SourceExists("ICMMonitorService"))
@@ -51,7 +49,7 @@ namespace MonitorService
         {
             //eventlog.WriteEntry("Service Start");
 
-            //Debugger.Break();
+            Debugger.Break();
 
             _exceptionMonitor.Start();
 

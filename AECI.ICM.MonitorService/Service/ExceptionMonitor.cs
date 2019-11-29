@@ -1,6 +1,7 @@
-﻿using MonitorService.Entities;
+﻿using AECI.ICM.Shared.Interfaces;
+using AECI.ICM.Shared.Service;
+using MonitorService.Entities;
 using MonitorService.Interfaces;
-using MonitorService.Service;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -16,14 +17,13 @@ namespace MonitorService.Services
 
         private MonDbContext _dbContext;
         private Setting _currSetting;
-        private string muchEmail = "muchReply@muchasphalt.com";
-        private string _lock;
+        private string muchEmail = "muchreply@muchasphalt.com";       
       
         #endregion
 
         #region Readonly Fields
 
-        private readonly INotificationService _notificationService;
+        private readonly ISharedNotificationService _notificationService;
 
         #endregion
 
@@ -32,10 +32,13 @@ namespace MonitorService.Services
         public ExceptionMonitor()
         {
             _dbContext = new MonDbContext();
-            _notificationService = new EmailNotificationService(
-                   server: "muchsmtp",
-                   fromEmail: muchEmail
-            );
+            _notificationService = new SharedEmailNotificationService();
+            _notificationService.Body = "test";
+            _notificationService.CC = "johan.ccs@gmail.com";
+            _notificationService.FromEmail = "muchasphalt@muchasphalt.com";
+            _notificationService.Server = "muchserver";
+            _notificationService.Subject = "test";
+            _notificationService.ToEmail = "johan.potgieter@muchasphalt.com";
         }
 
         #endregion
@@ -54,16 +57,10 @@ namespace MonitorService.Services
 
                 foreach (var exception in exceptions)
                 {
-                    var mailTo = _currSetting.Emails.First(p => p.Site == exception.Site).BranchManagerEmail;
-                    var message = new MailMessage(muchEmail, mailTo);
-                    
-                    message.Subject = "AECI ICM Exception List";
-                    message.Body = BuildBody(exception);
-
-                    mailMessages.Add(message);
+                    mailMessages.Add(BuildMessage(exception, _currSetting.WarningEmail));
                 }
 
-                _notificationService.Send(mailMessages);
+                _notificationService.Send(mailMessages);               
             }
         }
 
@@ -123,7 +120,7 @@ namespace MonitorService.Services
 
             //sites.Add(11, "ER");
             //sites.Add(14, "CK");
-            //sites.Add(23, "George");
+            sites.Add(23, "GEO");
             sites.Add(21, "PE");
             //sites.Add(31, "BFN");
             //sites.Add(40, "BEN2");
@@ -150,6 +147,21 @@ namespace MonitorService.Services
             sb.AppendLine($"Month - {ex.Month}");
 
             return sb.ToString();
+        }
+
+        private MailMessage BuildMessage(ResultException exception, string cc)
+        {
+            var mailTo = _currSetting.Emails
+                        .First(p => p.Site.ToLower() == exception.Site.ToLower())
+                        .BranchManagerEmail;
+
+            var message = new MailMessage(muchEmail, mailTo);
+
+            message.Subject = "AECI ICM Exception List";
+            message.Body = BuildBody(exception);
+            message.CC.Add(cc);
+
+            return message;
         }
 
         #endregion

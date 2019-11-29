@@ -1,9 +1,11 @@
-﻿using AECI.ICM.Domain.Entities;
+﻿using AECI.ICM.Application.Interfaces;
+using AECI.ICM.Domain.Entities;
 using AECI.ICM.Domain.Interfaces;
 using AECI.ICM.Shared.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,16 +18,21 @@ namespace AECI.ICM.Api.Controllers
     {
         #region Readonly Fields
 
-        private readonly IICMService _icmService;      
+        private readonly IICMService _icmService;
+        private readonly INotificationService _notificationService;
+        private readonly ISettingsService _settingsService;
 
         #endregion
 
         #region Constructor
 
-        public ICMController(IICMService icmService)
+        public ICMController(IICMService icmService, 
+                             INotificationService notificationService,
+                             ISettingsService settingsService)
         {
             _icmService = icmService;
-          
+            _notificationService = notificationService;
+            _settingsService = settingsService;
         }
 
         #endregion
@@ -77,7 +84,8 @@ namespace AECI.ICM.Api.Controllers
                     if (response.IsSuccessStatusCode)
                     {
                         var path = response.Content.ReadAsStringAsync().Result;
-                        //var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
+                        var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
+                        EmailReport(deserialisedPath, args.Branch);
 
                         return Ok(path);
                     }
@@ -132,6 +140,28 @@ namespace AECI.ICM.Api.Controllers
             return null;
         }
 
+        #endregion
+
+        #region Private Methods
+
+        private void EmailReport(string reportPath, string site)
+        {
+            var setting = _settingsService.GetAllAsync();
+            var mailTo = setting.Emails.FirstOrDefault(p => p.Site == site).BranchManagerEmail;
+
+            _notificationService.Body = "Please find the ICM report as attachment";
+            _notificationService.From = "muchreply@muchasphalt.com";
+            _notificationService.Server = "muchsmtp";
+            _notificationService.Subject = $"ICM report - {DateTime.Now.ToShortDateString()}";
+            _notificationService.To = mailTo;
+            _notificationService.AttachmentPath = reportPath;
+
+            if (setting.EnableWarning)
+                _notificationService.CC = setting.WarningEmail;
+
+            _notificationService.Send();
+        }
+        
         #endregion
     }
 }

@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MonitorService.Interfaces;
-using MonitorService.Service;
+﻿using AECI.ICM.Shared.Interfaces;
+using AECI.ICM.Shared.Service;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AECI.Monitor.Test
 {
@@ -10,12 +10,14 @@ namespace AECI.Monitor.Test
         [TestMethod]
         public void Send()
         {
-            INotificationService emailService = new EmailNotificationService(
-                   server:"muchsmtp", 
-                   fromEmail:"muchasphalt@muchasphalt.com"     
-                );
+            ISharedNotificationService emailService = 
+                new SharedEmailNotificationService();
 
-            emailService.Send();
+            emailService.Body = "test email service";
+            emailService.Subject = "Test";
+            emailService.ToEmail = "johan.potgieter@muchasphalt.com";          
+            emailService.Server = "muchsmtp";
+            emailService.ToEmail = "johan.potgieter@muchasphalt.com";
         }
     }
 }

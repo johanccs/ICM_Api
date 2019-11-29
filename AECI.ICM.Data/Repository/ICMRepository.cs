@@ -40,11 +40,23 @@ namespace AECI.ICM.Data.Repository
             return Map(result);
         }
 
+        /// <summary>
+        /// Add a ResultEntity to the Database to indicate that a report was completed for the month.
+        /// </summary>
+        /// <param name="entity"></param>
         public void Add(ResultEntity entity)
         {
             try
             {
                 var result = Map(entity);
+
+                var currentResult = _ctx.Results.FirstOrDefault(p => p.Month == entity.Month && 
+                                                                p.Branch == entity.Branch);
+
+                if (currentResult != null)
+                    throw new Exception($"A duplicate record was found for {entity.Branch}", 
+                          new Exception("Duplicate entry found."));
+
                 _ctx.Results.Add(result);
 
                 _ctx.SaveChanges();
@@ -55,6 +67,10 @@ namespace AECI.ICM.Data.Repository
             }
         }
 
+        /// <summary>
+        /// Add a new ICMEntity to the database
+        /// </summary>
+        /// <param name="entity"></param>
         public void Add(ICMEntity entity)
         {
             try

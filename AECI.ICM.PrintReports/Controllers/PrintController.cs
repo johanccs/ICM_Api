@@ -29,12 +29,19 @@ namespace AECI.ICM.PrintReports.Controllers
 
             report.Run();
 
-            using (var stream = new FileStream(fullPath, FileMode.Create))
+            try
             {
-                docEx.Export(report.Document, stream);
-            }
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    docEx.Export(report.Document, stream);
+                }
 
-            return Request.CreateResponse(HttpStatusCode.OK, fullPath);
+                return Request.CreateResponse(HttpStatusCode.OK, fullPath);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         private arICM BuildReport(ResponseViewModel param, string imgPath)

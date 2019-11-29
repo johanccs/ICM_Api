@@ -3,6 +3,8 @@ using AECI.ICM.Application.Services;
 using AECI.ICM.Data.Context;
 using AECI.ICM.Data.Repository;
 using AECI.ICM.Domain.Interfaces;
+using AECI.ICM.Shared.Interfaces;
+using AECI.ICM.Shared.Service;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +22,8 @@ namespace AECI.ICM.IoC
             services.AddScoped<ISettingRepository, SettingRepository>();
             services.AddScoped<IResultService, ResultService>();
             services.AddScoped<IResultRepository, ResultRepository>();
+            services.AddScoped<ISharedNotificationService, SharedEmailNotificationService>();
+            services.AddScoped<INotificationService, NotificationService>();
           
             services.AddDbContext<ICMDbContext>(options =>
             {
@@ -29,6 +33,7 @@ namespace AECI.ICM.IoC
 
         public static void ConfigureServices(this IServiceCollection services)
         {
+            
             services.AddCors();
 
             //services.AddCors(options =>

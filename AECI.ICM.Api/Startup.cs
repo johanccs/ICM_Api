@@ -1,4 +1,5 @@
-﻿using AECI.ICM.Application.Interfaces;
+﻿using AECI.ICM.Api.ViewModels;
+using AECI.ICM.Application.Interfaces;
 using AECI.ICM.Application.Services;
 using AECI.ICM.IoC;
 using AutoMapper;
@@ -26,6 +27,7 @@ namespace AECI.ICM.Api
             services.AddAutoMapper(typeof(Startup));
             services.RegisterServices(Configuration);
             services.ConfigureServices();
+            services.Configure<LdapConfig>(Configuration.GetSection("Ldap"));
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
@@ -40,7 +42,7 @@ namespace AECI.ICM.Api
             }
 
             //app.UseCors("Cors");
-
+            
             app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseMvc();
         }

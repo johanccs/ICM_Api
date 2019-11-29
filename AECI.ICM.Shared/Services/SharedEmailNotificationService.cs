@@ -1,42 +1,35 @@
-﻿using MonitorService.Entities;
-using MonitorService.Interfaces;
+﻿using AECI.ICM.Shared.Entities;
+using AECI.ICM.Shared.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
 
-namespace MonitorService.Service
+namespace AECI.ICM.Shared.Service
 {
-    public class EmailNotificationService : INotificationService
+    public class SharedEmailNotificationService : ISharedNotificationService
     {
         #region Fields
 
         private  MailMessage _notificationClient;
-
-        private string _server;
-        private string _fromEmail;
-       
+        
         #endregion
 
         #region Properties
 
+        public string Server { get; set; }
+        public string FromEmail { get; set; }
         public string ToEmail { get; set; }
         public string Subject { get; set; }
         public string Body { get; set; }
+        public string CC { get; set; } = null;
+        public string Attachment { get; set; } = null;
 
         #endregion
 
         #region Constructor
 
-        public EmailNotificationService(string server, string fromEmail)
+        public SharedEmailNotificationService()
         {
-            if (server == default)
-                throw new ArgumentNullException(nameof(server), "Supply server name or address");
-
-            if (fromEmail == default)
-                throw new ArgumentNullException(nameof(server), "Supply the source email address");
-
-            _fromEmail = fromEmail;
-            _server = server;
         }
 
         #endregion
@@ -45,13 +38,16 @@ namespace MonitorService.Service
 
         public void Send()
         {
-            _notificationClient = EmailClient.Create(_fromEmail, 
-                                                     ToEmail, 
-                                                     Subject, 
-                                                     Body); 
+                _notificationClient = EmailClient
+                .Create(FromEmail,
+                        ToEmail,
+                        Subject,
+                        Body,
+                        CC, 
+                        Attachment);   
             try
             {
-                SmtpClient client = new SmtpClient(_server);
+                SmtpClient client = new SmtpClient(Server);
                 client.UseDefaultCredentials = true;
 
                 client.Send(_notificationClient);
@@ -67,7 +63,7 @@ namespace MonitorService.Service
         {
             try
             {
-                SmtpClient client = new SmtpClient(_server);
+                SmtpClient client = new SmtpClient(Server);
                 client.UseDefaultCredentials = true;
 
                 foreach (var email in emails)
@@ -78,7 +74,7 @@ namespace MonitorService.Service
                 throw;
             }
         }
-
+        
         #endregion
     }
 }
