@@ -40,7 +40,7 @@ namespace AECI.ICM.PrintReports.Controllers
             }
             catch (Exception)
             {
-                throw;
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Report already open");
             }
         }
 

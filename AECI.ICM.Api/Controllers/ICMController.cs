@@ -1,5 +1,4 @@
 ﻿using AECI.ICM.Application.Interfaces;
-using AECI.ICM.Domain.Entities;
 using AECI.ICM.Domain.Interfaces;
 using AECI.ICM.Shared.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -91,7 +90,11 @@ namespace AECI.ICM.Api.Controllers
                     }
                     else
                     {
-                        return BadRequest("Print Service not Running");
+                        var builder = new StringBuilder();
+                        builder.AppendLine(response.ReasonPhrase);
+                        builder.AppendLine("Ensure that print service is running and");
+                        builder.AppendLine("the report is not open already");
+                        return BadRequest(builder.ToString());
                     }
                 }
             }

@@ -231,7 +231,7 @@
             this.lblSectionName,
             this.lblComments,
             this.lblFFC});
-            this.detail.Height = 0.9999999F;
+            this.detail.Height = 0.9166666F;
             this.detail.Name = "detail";
             // 
             // lblSection
@@ -275,6 +275,7 @@
             // 
             // lblCtrlEffectiveness
             // 
+            this.lblCtrlEffectiveness.DataField = "CtrlEffectiveness";
             this.lblCtrlEffectiveness.Height = 0.2F;
             this.lblCtrlEffectiveness.HyperLink = null;
             this.lblCtrlEffectiveness.Left = 4.56572F;
@@ -374,8 +375,8 @@
             this.label2.HyperLink = null;
             this.label2.Left = 0.146F;
             this.label2.Name = "label2";
-            this.label2.Style = "font-family: Microsoft Sans Serif; font-size: 12pt; font-weight: normal; vertical" +
-    "-align: middle; ddo-char-set: 0";
+            this.label2.Style = "font-family: Microsoft Sans Serif; font-size: 11.25pt; font-weight: normal; verti" +
+    "cal-align: middle; ddo-char-set: 0";
             this.label2.Text = "Branch: ";
             this.label2.Top = 0.7320001F;
             this.label2.Width = 0.76F;
@@ -386,8 +387,8 @@
             this.lblBranch.HyperLink = null;
             this.lblBranch.Left = 1.01F;
             this.lblBranch.Name = "lblBranch";
-            this.lblBranch.Style = "font-family: Microsoft Sans Serif; font-size: 12pt; vertical-align: middle; ddo-c" +
-    "har-set: 0";
+            this.lblBranch.Style = "font-family: Microsoft Sans Serif; font-size: 11.25pt; vertical-align: middle; dd" +
+    "o-char-set: 0";
             this.lblBranch.Text = "No Branch";
             this.lblBranch.Top = 0.7320001F;
             this.lblBranch.Width = 3.01F;
@@ -398,8 +399,8 @@
             this.label3.HyperLink = null;
             this.label3.Left = 0.146F;
             this.label3.Name = "label3";
-            this.label3.Style = "font-family: Microsoft Sans Serif; font-size: 12pt; font-weight: normal; vertical" +
-    "-align: middle; ddo-char-set: 0";
+            this.label3.Style = "font-family: Microsoft Sans Serif; font-size: 11.25pt; font-weight: normal; verti" +
+    "cal-align: middle; ddo-char-set: 0";
             this.label3.Text = "Date: ";
             this.label3.Top = 1.022F;
             this.label3.Width = 0.76F;
@@ -410,8 +411,8 @@
             this.lblDate.HyperLink = null;
             this.lblDate.Left = 1.01F;
             this.lblDate.Name = "lblDate";
-            this.lblDate.Style = "font-family: Microsoft Sans Serif; font-size: 12pt; vertical-align: middle; ddo-c" +
-    "har-set: 0";
+            this.lblDate.Style = "font-family: Microsoft Sans Serif; font-size: 11.25pt; vertical-align: middle; dd" +
+    "o-char-set: 0";
             this.lblDate.Text = "Todays Date";
             this.lblDate.Top = 1.022F;
             this.lblDate.Width = 3.01F;
@@ -422,8 +423,8 @@
             this.label4.HyperLink = null;
             this.label4.Left = 0.1459999F;
             this.label4.Name = "label4";
-            this.label4.Style = "font-family: Microsoft Sans Serif; font-size: 12pt; font-weight: normal; vertical" +
-    "-align: middle; ddo-char-set: 0";
+            this.label4.Style = "font-family: Microsoft Sans Serif; font-size: 11.25pt; font-weight: normal; verti" +
+    "cal-align: middle; ddo-char-set: 0";
             this.label4.Text = "Month: ";
             this.label4.Top = 1.314F;
             this.label4.Width = 0.76F;
@@ -434,8 +435,8 @@
             this.lblMonth.HyperLink = null;
             this.lblMonth.Left = 1.01F;
             this.lblMonth.Name = "lblMonth";
-            this.lblMonth.Style = "font-family: Microsoft Sans Serif; font-size: 12pt; vertical-align: middle; ddo-c" +
-    "har-set: 0";
+            this.lblMonth.Style = "font-family: Microsoft Sans Serif; font-size: 11.25pt; vertical-align: middle; dd" +
+    "o-char-set: 0";
             this.lblMonth.Text = "Month";
             this.lblMonth.Top = 1.314F;
             this.lblMonth.Width = 3.01F;
