@@ -52,18 +52,17 @@ namespace AECI.ICM.Shared.Service
 
                 client.Send(_notificationClient);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                var s = ex.Message;
                 throw;
             }
         }
 
         public void Send(List<MailMessage> emails)
         {
+            SmtpClient client = new SmtpClient(Server);
             try
             {
-                SmtpClient client = new SmtpClient(Server);
                 client.UseDefaultCredentials = true;
 
                 foreach (var email in emails)
@@ -72,6 +71,10 @@ namespace AECI.ICM.Shared.Service
             catch (Exception)
             {
                 throw;
+            }
+            finally
+            {
+                client = null;
             }
         }
         

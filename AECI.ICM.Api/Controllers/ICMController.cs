@@ -4,6 +4,8 @@ using AECI.ICM.Shared.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -70,6 +72,7 @@ namespace AECI.ICM.Api.Controllers
                 using (var client = new HttpClient())
                 {
                     client.BaseAddress = new Uri("http://localhost:62176/");
+                    //client.BaseAddress = new Uri("http://localhost:8090/");
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(
                                     new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(
@@ -85,6 +88,9 @@ namespace AECI.ICM.Api.Controllers
                         var path = response.Content.ReadAsStringAsync().Result;
                         var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
                         EmailReport(deserialisedPath, args.Branch);
+                        //var result = DeSerialize(deserialisedPath);
+
+                        //Debug.Print(result.ToString());
 
                         return Ok(path);
                     }
@@ -149,22 +155,37 @@ namespace AECI.ICM.Api.Controllers
 
         private void EmailReport(string reportPath, string site)
         {
-            var setting = _settingsService.GetAllAsync();
-            var mailTo = setting.Emails.FirstOrDefault(p => p.Site == site).BranchManagerEmail;
+            try
+            {
+                var setting = _settingsService.GetAllAsync();
+                var mailTo = setting.Emails.FirstOrDefault(p => p.Site == site).BranchManagerEmail;
 
-            _notificationService.Body = "Please find the ICM report as attachment";
-            _notificationService.From = "muchreply@muchasphalt.com";
-            _notificationService.Server = "muchsmtp";
-            _notificationService.Subject = $"ICM report - {DateTime.Now.ToShortDateString()}";
-            _notificationService.To = mailTo;
-            _notificationService.AttachmentPath = reportPath;
+                _notificationService.Body = "Please find the ICM report as attachment";
+                _notificationService.From = "muchreply@muchasphalt.com";
+                _notificationService.Server = "muchsmtp";
+                _notificationService.Subject = $"ICM report - {DateTime.Now.ToShortDateString()}";
+                _notificationService.To = mailTo;
+                _notificationService.AttachmentPath = reportPath;
 
-            if (setting.EnableWarning)
-                _notificationService.CC = setting.WarningEmail;
+                if (setting.EnableWarning)
+                    _notificationService.CC = setting.WarningEmail;
 
-            _notificationService.Send();
+                _notificationService.Send();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
         
+        public FileStreamResult DeSerialize(string filePath)
+        {
+            var stream = new FileStream(filePath, FileMode.Open);
+            //var stream = new FileStream(@"C:\TestReports\t.pdf", FileMode.Open);
+
+            return new FileStreamResult(stream, "application/pdf");
+        }
+
         #endregion
     }
 }

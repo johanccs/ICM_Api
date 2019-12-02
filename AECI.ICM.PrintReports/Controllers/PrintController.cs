@@ -29,19 +29,38 @@ namespace AECI.ICM.PrintReports.Controllers
 
             report.Run();
 
+            Logging($"{DateTime.Now} - Print Report After Run");
+
             try
             {
                 using (var stream = new FileStream(fullPath, FileMode.Create))
                 {
+                    Logging($"{DateTime.Now} - Inside FileStream");
                     docEx.Export(report.Document, stream);
+                    Logging($"{DateTime.Now} - After Filestream Export Before");
                 }
-
+                Logging($"{DateTime.Now} - Print Report After Run");
                 return Request.CreateResponse(HttpStatusCode.OK, fullPath);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Report already open");
+                Logging($"{DateTime.Now} - {ex.Message} : PrintReport");
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message);
             }
+            finally
+            {
+                imgPath = null;
+                filePath = null;
+                fileName = null;
+                fullPath = null;
+                docEx = null;
+                report = null;
+            }
+        }
+
+        public IHttpActionResult Get()
+        {
+            return Ok("Boo");
         }
 
         private arICM BuildReport(ResponseViewModel param, string imgPath)
@@ -71,6 +90,25 @@ namespace AECI.ICM.PrintReports.Controllers
             var result = $"ICMReport_{entity?.Branch}_{entity?.Month}_{DateTime.Now.Year}";
 
             return result;
+        }
+
+        private bool Logging(string msg)
+        {
+            try
+            {
+                using(var sr = new StreamWriter(@"C:\TestReports\Exceptions.txt",true))
+                {
+                    sr.WriteLine(msg);
+                    sr.Flush();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                var s = ex.Message;
+                throw;
+            }
         }
     }
 }
