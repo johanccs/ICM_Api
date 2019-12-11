@@ -118,23 +118,23 @@ namespace MonitorService.Services
         {
             var sites = new Dictionary<int, string>();
 
-            //sites.Add(11, "ER");
-            //sites.Add(14, "CK");
+            sites.Add(11, "ER");
+            sites.Add(14, "CK");
             sites.Add(23, "GEO");
             sites.Add(21, "PE");
-            //sites.Add(31, "BFN");
-            //sites.Add(40, "BEN2");
-            //sites.Add(41, "BEN");
-            //sites.Add(42, "EIK");
-            //sites.Add(43, "RDP");
-            //sites.Add(44, "POM");
-            //sites.Add(47, "POL");
-            //sites.Add(48, "WIT");
-            //sites.Add(51, "COED");
-            //sites.Add(52, "EMP");
-            //sites.Add(53, "PMB");
-            //sites.Add(82, "ECA");
-            //sites.Add(84, "UMT");
+            sites.Add(31, "BFN");
+            sites.Add(40, "BEN2");
+            sites.Add(41, "BEN");
+            sites.Add(42, "EIK");
+            sites.Add(43, "RDP");
+            sites.Add(44, "POM");
+            sites.Add(47, "POL");
+            sites.Add(48, "WIT");
+            sites.Add(51, "COED");
+            sites.Add(52, "EMP");
+            sites.Add(53, "PMB");
+            sites.Add(82, "ECA");
+            sites.Add(84, "UMT");
 
             return sites;
         }

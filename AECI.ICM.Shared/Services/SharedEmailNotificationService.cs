@@ -38,24 +38,14 @@ namespace AECI.ICM.Shared.Service
 
         public void Send()
         {
-                _notificationClient = EmailClient
+                var success = EmailClient
                 .Create(FromEmail,
                         ToEmail,
                         Subject,
                         Body,
+                        Server,
                         CC, 
-                        Attachment);   
-            try
-            {
-                SmtpClient client = new SmtpClient(Server);
-                client.UseDefaultCredentials = true;
-
-                client.Send(_notificationClient);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+                        Attachment);
         }
 
         public void Send(List<MailMessage> emails)

@@ -29,22 +29,17 @@ namespace AECI.ICM.PrintReports.Controllers
 
             report.Run();
 
-            Logging($"{DateTime.Now} - Print Report After Run");
-
             try
             {
                 using (var stream = new FileStream(fullPath, FileMode.Create))
                 {
-                    Logging($"{DateTime.Now} - Inside FileStream");
                     docEx.Export(report.Document, stream);
-                    Logging($"{DateTime.Now} - After Filestream Export Before");
                 }
-                Logging($"{DateTime.Now} - Print Report After Run");
+               
                 return Request.CreateResponse(HttpStatusCode.OK, fullPath);
             }
             catch (Exception ex)
             {
-                Logging($"{DateTime.Now} - {ex.Message} : PrintReport");
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message);
             }
             finally
@@ -58,24 +53,24 @@ namespace AECI.ICM.PrintReports.Controllers
             }
         }
 
-        public IHttpActionResult Get()
-        {
-            return Ok("Boo");
-        }
-
         private arICM BuildReport(ResponseViewModel param, string imgPath)
         {
             var report = new arICM();
             report.lblBranch.Text = param.Branch;
             report.lblDate.Text = param.Date.ToShortDateString();
             report.lblMonth.Text = param.Month;
-            report.pictLogo.Image = System.Drawing.Image.FromFile(imgPath);
+            report.pictLogo.Image = Image.FromFile(imgPath);
             report.pictLogo.SizeMode = GrapeCity.ActiveReports.SectionReportModel.SizeModes.Zoom;
 
             report.picBMSig.Image = Image.FromFile(param.BMSigPath);
-            report.picFinSig.Image = Image.FromFile(param.BMSigPath);
+            report.picFinSig.Image = Image.FromFile(param.FinSigPath);
+
             report.picBMSig.SizeMode = GrapeCity.ActiveReports.SectionReportModel.SizeModes.Zoom;
             report.picFinSig.SizeMode = GrapeCity.ActiveReports.SectionReportModel.SizeModes.Zoom;
+
+            report.picBMSig.PictureAlignment = GrapeCity.ActiveReports.SectionReportModel.PictureAlignment.TopLeft;
+            report.picFinSig.PictureAlignment = GrapeCity.ActiveReports.SectionReportModel.PictureAlignment.TopLeft;
+
             report.lblGenComments.Text = param.GenComments;
             report.lblBMName.Text = param.BMName;
             report.lblFinName.Text = param.FinName;
@@ -83,7 +78,7 @@ namespace AECI.ICM.PrintReports.Controllers
 
             return report;
         }
-
+        
         private string CreateFileName(ResponseViewModel entity)
         {
             //Create report filename by taking the Branch + Month + Literal ICMReport;

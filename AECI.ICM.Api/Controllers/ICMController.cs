@@ -4,12 +4,12 @@ using AECI.ICM.Shared.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace AECI.ICM.Api.Controllers
 {
@@ -62,8 +62,8 @@ namespace AECI.ICM.Api.Controllers
         public async Task<IActionResult> Post(ResponseViewModel args)
         {
             HttpResponseMessage response = null;
-            args.BMSigPath = @"C:\TestReports\bmSig.png";
-            args.FinSigPath = @"C:\TestReports\bmSig.png";
+            args.BMSigPath = BuildSignaturePath(args);
+            args.FinSigPath = BuildFinSigPath();
 
             try
             {
@@ -72,7 +72,7 @@ namespace AECI.ICM.Api.Controllers
                 using (var client = new HttpClient())
                 {
                     client.BaseAddress = new Uri("http://localhost:62176/");
-                    //client.BaseAddress = new Uri("http://localhost:8090/");
+                    //client.BaseAddress = new Uri("http://madev04RG:8090/");
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(
                                     new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(
@@ -88,10 +88,9 @@ namespace AECI.ICM.Api.Controllers
                         var path = response.Content.ReadAsStringAsync().Result;
                         var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
                         EmailReport(deserialisedPath, args.Branch);
+
                         //var result = DeSerialize(deserialisedPath);
-
-                        //Debug.Print(result.ToString());
-
+                    
                         return Ok(path);
                     }
                     else
@@ -153,6 +152,46 @@ namespace AECI.ICM.Api.Controllers
 
         #region Private Methods
 
+        private string BuildSignaturePath(ResponseViewModel args)
+        {
+            var basePath = @"C:\TestReports\";
+            var sigPath = basePath;
+            if (args.Branch.ToLower() == "GEO".ToLower())
+                sigPath += @"GEO\";
+            else if (args.Branch.ToLower() == "UMT".ToLower())
+                sigPath += @"UMT\";
+            else if (args.Branch.ToLower() == "POM".ToLower())
+                sigPath += @"POM\";
+            else if (args.Branch.ToLower() == "EMP".ToLower())
+                sigPath += @"EMP\";
+            else
+            {
+                sigPath += "NoSig.png";
+                return sigPath;
+            }
+
+            sigPath += "bmsig.jpg";
+
+            if (System.IO.File.Exists(sigPath))
+                return sigPath;
+
+            return basePath += "NoSig.png";
+        }
+
+        private string BuildFinSigPath()
+        {
+            var basePath = @"C:\TestReports\";
+            var finsigPath = basePath;
+            finsigPath += "finsig.png";
+
+            var nosigPath = basePath += "NoSig.png";
+
+            if (!System.IO.File.Exists(basePath))
+                return nosigPath;
+
+            return finsigPath;
+        }
+
         private void EmailReport(string reportPath, string site)
         {
             try
@@ -160,7 +199,7 @@ namespace AECI.ICM.Api.Controllers
                 var setting = _settingsService.GetAllAsync();
                 var mailTo = setting.Emails.FirstOrDefault(p => p.Site == site).BranchManagerEmail;
 
-                _notificationService.Body = "Please find the ICM report as attachment";
+                _notificationService.Body = BuildBody(site);
                 _notificationService.From = "muchreply@muchasphalt.com";
                 _notificationService.Server = "muchsmtp";
                 _notificationService.Subject = $"ICM report - {DateTime.Now.ToShortDateString()}";
@@ -177,7 +216,17 @@ namespace AECI.ICM.Api.Controllers
                 throw;
             }
         }
-        
+
+        private string BuildBody(string site)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Please find the ICM report as attachment");
+            sb.AppendLine($"Site: {site}");
+            sb.AppendLine($"Date: {DateTime.Now.ToString("dd/MM/yyyy")}");
+
+            return sb.ToString();
+        }
+
         public FileStreamResult DeSerialize(string filePath)
         {
             var stream = new FileStream(filePath, FileMode.Open);

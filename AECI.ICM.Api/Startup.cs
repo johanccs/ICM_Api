@@ -1,6 +1,4 @@
 ﻿using AECI.ICM.Api.ViewModels;
-using AECI.ICM.Application.Interfaces;
-using AECI.ICM.Application.Services;
 using AECI.ICM.IoC;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;

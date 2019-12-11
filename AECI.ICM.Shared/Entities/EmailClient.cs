@@ -11,7 +11,7 @@ namespace AECI.ICM.Shared.Entities
         internal string _toEmail;
         internal string _subject;
         internal string _body;
-
+       
         #endregion
 
         #region Constructor
@@ -42,25 +42,40 @@ namespace AECI.ICM.Shared.Entities
 
         #region Methods
 
-        public static MailMessage Create(string fromEmail,
+        public static bool Create(string fromEmail,
                                         string toEmail,
                                         string subject,
                                         string body,
+                                        string server,
                                         string cc=null,
                                         string attachmentPath=null)
         {
-            EmailClient client = new EmailClient(fromEmail, toEmail, subject, body);
-            MailMessage message = new MailMessage(client._fromEmail, client._toEmail);
-            message.Subject = client._subject;
-            message.Body = client._body;
+            //EmailClient client = new EmailClient(fromEmail, toEmail, subject, body);
+            using (var message = new MailMessage(fromEmail, toEmail))
+            {
+                message.Subject = subject;
+                message.Body = body;
 
-            if(!string.IsNullOrEmpty(cc))
-                message.CC.Add(cc);
+                if (!string.IsNullOrEmpty(cc))
+                    message.CC.Add(cc);
 
-            if(!string.IsNullOrEmpty(attachmentPath))
-                message.Attachments.Add(new Attachment(attachmentPath));
+                if (!string.IsNullOrEmpty(attachmentPath))
+                    message.Attachments.Add(new Attachment(attachmentPath));
 
-            return message;
+                SmtpClient client = new SmtpClient(server);
+                client.UseDefaultCredentials = true;
+
+                client.Send(message);
+
+                return true;
+            }
+        }
+
+        public static void ClearAttachments(ref MailMessage message)
+        {
+            message.Attachments.Clear();
+            message.Attachments.Dispose();
+            message = null;
         }
 
         #endregion
