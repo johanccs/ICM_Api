@@ -24,7 +24,7 @@ namespace AECI.ICM.Api
         {
             services.AddAutoMapper(typeof(Startup));
             services.RegisterServices(Configuration);
-            services.ConfigureServices();
+            services.ConfigureServices(Configuration);
             services.Configure<LdapConfig>(Configuration.GetSection("Ldap"));
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)

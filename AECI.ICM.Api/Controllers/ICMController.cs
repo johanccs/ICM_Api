@@ -9,7 +9,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
 
 namespace AECI.ICM.Api.Controllers
 {
@@ -72,7 +71,7 @@ namespace AECI.ICM.Api.Controllers
                 using (var client = new HttpClient())
                 {
                     client.BaseAddress = new Uri("http://localhost:62176/");
-                    //client.BaseAddress = new Uri("http://madev04RG:8090/");
+                    //client.BaseAddress = new Uri("http://madev04:8090/");
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(
                                     new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(
@@ -87,10 +86,15 @@ namespace AECI.ICM.Api.Controllers
                     {
                         var path = response.Content.ReadAsStringAsync().Result;
                         var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
-                        EmailReport(deserialisedPath, args.Branch);
 
-                        //var result = DeSerialize(deserialisedPath);
-                    
+                       if( EmailReport(deserialisedPath, args.Branch))
+                        {
+                            byte[] filebytes = System.IO.File.ReadAllBytes(deserialisedPath);
+                            var file = Path.GetFileName(path);
+
+                            return File(filebytes, System.Net.Mime.MediaTypeNames.Application.Pdf, file);
+                        }
+
                         return Ok(path);
                     }
                     else
@@ -192,7 +196,7 @@ namespace AECI.ICM.Api.Controllers
             return finsigPath;
         }
 
-        private void EmailReport(string reportPath, string site)
+        private bool EmailReport(string reportPath, string site)
         {
             try
             {
@@ -210,6 +214,8 @@ namespace AECI.ICM.Api.Controllers
                     _notificationService.CC = setting.WarningEmail;
 
                 _notificationService.Send();
+
+                return true;
             }
             catch (Exception)
             {
