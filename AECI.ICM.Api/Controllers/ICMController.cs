@@ -158,7 +158,7 @@ namespace AECI.ICM.Api.Controllers
 
         private string BuildSignaturePath(ResponseViewModel args)
         {
-            var basePath = @"C:\TestReports\";
+            var basePath = @"D:\TestReports\";
             var sigPath = basePath;
             if (args.Branch.ToLower() == "GEO".ToLower())
                 sigPath += @"GEO\";
@@ -184,7 +184,7 @@ namespace AECI.ICM.Api.Controllers
 
         private string BuildFinSigPath()
         {
-            var basePath = @"C:\TestReports\";
+            var basePath = @"D:\TestReports\";
             var finsigPath = basePath;
             finsigPath += "finsig.png";
 
@@ -205,7 +205,7 @@ namespace AECI.ICM.Api.Controllers
 
                 _notificationService.Body = BuildBody(site);
                 _notificationService.From = "muchreply@muchasphalt.com";
-                _notificationService.Server = "muchsmtp";
+                _notificationService.Server = "smtp.saix.net";
                 _notificationService.Subject = $"ICM report - {DateTime.Now.ToShortDateString()}";
                 _notificationService.To = mailTo;
                 _notificationService.AttachmentPath = reportPath;

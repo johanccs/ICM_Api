@@ -1,6 +1,8 @@
-﻿namespace AECI.ICM.Api.ViewModels
+﻿using AECI.ICM.Application.Interfaces;
+
+namespace AECI.ICM.Api.ViewModels
 {
-    public class LoginViewModel
+    public class NullRefLogin : ILoginCommand
     {
         public string Username { get; set; }
 
@@ -15,5 +17,7 @@
         public string DisplayName { get; set; }
 
         public string Role { get; set; }
+
+        public string SystemStatus { get; set; }
     }
 }

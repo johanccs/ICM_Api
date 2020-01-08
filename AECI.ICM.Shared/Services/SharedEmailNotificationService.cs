@@ -10,7 +10,7 @@ namespace AECI.ICM.Shared.Service
     {
         #region Fields
 
-        private  MailMessage _notificationClient;
+       // private  MailMessage _notificationClient;
         
         #endregion
 

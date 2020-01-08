@@ -14,8 +14,8 @@ namespace AECI.ICM.PrintReports.Controllers
     {   
         public HttpResponseMessage PrintReport(ResponseViewModel param)
         {
-            var imgPath = @"C:\TestReports\MuchLogo.png";
-            var filePath = @"C:\TestReports\";
+            var imgPath = @"D:\TestReports\MuchLogo.png";
+            var filePath = CreateFilePath(param, @"D:\TestReports\");
             var fileName = CreateFileName(param);
             var ext = "pdf";
             var fullPath = Path.Combine(filePath, fileName);
@@ -82,9 +82,20 @@ namespace AECI.ICM.PrintReports.Controllers
         private string CreateFileName(ResponseViewModel entity)
         {
             //Create report filename by taking the Branch + Month + Literal ICMReport;
+
             var result = $"ICMReport_{entity?.Branch}_{entity?.Month}_{DateTime.Now.Year}";
 
             return result;
+        }
+
+        private string CreateFilePath(ResponseViewModel param, string currFolderPath)
+        {
+            var folderPath = Path.Combine(currFolderPath, param.Branch);
+
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            return folderPath;
         }
 
         private bool Logging(string msg)

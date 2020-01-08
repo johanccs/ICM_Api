@@ -1,4 +1,5 @@
 ﻿using AECI.ICM.Application.Interfaces;
+using AECI.ICM.Application.Models;
 using AECI.ICM.Application.Services;
 using AECI.ICM.Data.Context;
 using AECI.ICM.Data.Repository;
@@ -24,6 +25,8 @@ namespace AECI.ICM.IoC
             services.AddScoped<IResultRepository, ResultRepository>();
             services.AddScoped<ISharedNotificationService, SharedEmailNotificationService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddSingleton<IBranchDirectoryService, BranchDirectoryService>();
+            services.AddScoped<IBranch, Branch>();
           
             services.AddDbContext<ICMDbContext>(options =>
             {

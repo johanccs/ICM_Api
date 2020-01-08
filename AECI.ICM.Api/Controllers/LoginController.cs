@@ -1,4 +1,8 @@
 ﻿using AECI.ICM.Api.ViewModels;
+using AECI.ICM.Application.ApplicationEnums;
+using AECI.ICM.Application.ApplicationExceptions;
+using AECI.ICM.Application.Commands;
+using AECI.ICM.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.DirectoryServices;
@@ -9,13 +13,33 @@ namespace AECI.ICM.Api.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
+        #region Private readonly fields
+
+        private SystemStatusEnum debug;
+        private readonly IBranchDirectoryService _branchDirectoryService;
+      
+        #endregion
+
+        #region Constructor
+
+        public LoginController(IBranchDirectoryService branchDirectory)
+        {
+            _branchDirectoryService = branchDirectory;
+            debug = SystemStatusEnum.Debug;
+        }
+
+        #endregion
+
         [HttpPost]
-        public IActionResult Login(LoginViewModel user)
+        public IActionResult Post(Login.V1.Login request)
         {
             try
             {
-                var loggedUser = Authenticate(user.Username);
-
+                var loggedUser = Authenticate(request.Username);
+                loggedUser.Site = _branchDirectoryService
+                                   .LocateByFullBranchName(loggedUser.Site,true)
+                                   .AbbrevName;
+               
                 if (string.IsNullOrEmpty(loggedUser.Email) && 
                     string.IsNullOrEmpty(loggedUser.DisplayName) &&
                     string.IsNullOrEmpty(loggedUser.Username))
@@ -26,8 +50,6 @@ namespace AECI.ICM.Api.Controllers
                 else
                     loggedUser.Role = Enums.Enums.RoleEnum.User.ToString();
 
-                loggedUser.Site = user.Site;
-                
                 return Ok(loggedUser);
             }
             catch (Exception ex)
@@ -36,42 +58,83 @@ namespace AECI.ICM.Api.Controllers
             }
         }
 
-        #region Private Methods
-
-        public LoginViewModel Authenticate(string username)
+        [HttpGet("{username}")]
+        public IActionResult Get(string username)
         {
             try
             {
-                var domPassword = "6a13tatqd9XRFkNUOFsC55GUrmiAjKelHokNDS2nW4u7Ipf2sswbUYDLMVXmkOq";
-                var domain = "192.168.210.45";
-                var user = new LoginViewModel();
+                var loggedUser = Authenticate(username);
+                var branches = _branchDirectoryService.LocateByFullBranchName(loggedUser.Site);
 
-                using (DirectoryEntry entry = new DirectoryEntry(domain, "ma\\majobs", domPassword))
-                {
-                    entry.Path = $"LDAP://{domain}";
+                return Ok(branches);
+            }
+            catch (Exception)
+            {
 
-                    using(DirectorySearcher searcher = new DirectorySearcher(entry))
+                throw;
+            }
+        }
+
+        #region Private Methods
+
+        public ILoginCommand Authenticate(string username)
+        {
+            try
+            {
+                if (debug == SystemStatusEnum.Debug)
+                    throw new AuthException(@"ma\majobs", "AD connection could not be established");
+
+                    var domPassword = "6a13tatqd9XRFkNUOFsC55GUrmiAjKelHokNDS2nW4u7Ipf2sswbUYDLMVXmkOq";
+                    var domain = "192.168.210.45";
+                    var user = new Login.V1.Login();
+
+                    using (DirectoryEntry entry = new DirectoryEntry(domain, "ma\\majobs", domPassword))
                     {
-                        searcher.Filter = $"SAMAccountName={username}";
-                        searcher.PropertiesToLoad.Add("DisplayName");
-                        searcher.PropertiesToLoad.Add("SAMAccountName");
-                        searcher.PropertiesToLoad.Add("Mail");
-                        //searcher.PropertiesToLoad.Add("");
+                        entry.Path = $"LDAP://{domain}";
 
-                        var result = searcher.FindAll();                       
-
-                        foreach(SearchResult sr in result)
+                        using (DirectorySearcher searcher = new DirectorySearcher(entry))
                         {
-                            user.ADUser = sr.Properties["samaccountname"][0].ToString();
-                            user.Email = sr.Properties["mail"][0].ToString();
-                            user.Username = sr.Properties["samaccountname"][0].ToString();
-                            user.DisplayName = sr.Properties["displayname"][0].ToString();
+                            searcher.Filter = $"SAMAccountName={username}";
+                            //searcher.PropertiesToLoad.Add("DisplayName");
+                            //searcher.PropertiesToLoad.Add("SAMAccountName");
+                            //searcher.PropertiesToLoad.Add("Mail");
+                            //searcher.PropertiesToLoad.Add("");
+
+                            var result = searcher.FindAll();
+
+                            foreach (SearchResult sr in result)
+                            {
+                                user.ADUser = sr.Properties["samaccountname"][0].ToString();
+                                user.Email = sr.Properties["mail"][0].ToString();
+                                user.Username = sr.Properties["samaccountname"][0].ToString();
+                                user.DisplayName = sr.Properties["displayname"][0].ToString();
+
+                                user.SystemStatus = SystemStatusEnum.Test.ToString();
+
+                            if (sr.Properties["office"].Count > 0)
+                                user.Site = sr.Properties["office"].ToString();
+                            else
+                                user.Site = sr.Properties["streetaddress"].ToString();
+                            }
                         }
                     }
-                }
-                return user;
+                    return user;
             }
-            catch (System.Exception)
+            catch (AuthException)
+            {
+                var exception = new NullRefLogin
+                {
+                    ADUser = "mrma86423",
+                    DisplayName = "Johan Potgieter",
+                    Email = "johan.ccs@gmail.com",
+                    Site = "Head Office",
+                    Username = "mrma86423",
+                    SystemStatus = SystemStatusEnum.Debug.ToString()
+                };
+
+                return exception;
+            }
+            catch (Exception)
             {
                 throw;
             }

@@ -19,41 +19,4 @@
     <ProjectReference Include="..\AECI.ICM.Shared\AECI.ICM.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Reports\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="GrapeCity.ActiveReports">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\GrapeCity.ActiveReports\v4.0_13.1.16872.0__cc4967777c49a3ff\GrapeCity.ActiveReports.dll</HintPath>
-    </Reference>
-    <Reference Include="GrapeCity.ActiveReports.Aspnetcore.Designer">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\GrapeCity.ActiveReports.Aspnetcore.Designer\v4.0_13.1.220.0__cc4967777c49a3ff\GrapeCity.ActiveReports.Aspnetcore.Designer.dll</HintPath>
-    </Reference>
-    <Reference Include="GrapeCity.ActiveReports.Aspnetcore.Viewer">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\GrapeCity.ActiveReports.Aspnetcore.Viewer\v4.0_13.1.640.0__cc4967777c49a3ff\GrapeCity.ActiveReports.Aspnetcore.Viewer.dll</HintPath>
-    </Reference>
-    <Reference Include="GrapeCity.ActiveReports.Core.DataProviders">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\GrapeCity.ActiveReports.Core.DataProviders\v4.0_1.0.2014.0__cc4967777c49a3ff\GrapeCity.ActiveReports.Core.DataProviders.dll</HintPath>
-    </Reference>
-    <Reference Include="GrapeCity.ActiveReports.Core.Diagnostics">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\GrapeCity.ActiveReports.Core.Diagnostics\v4.0_1.0.2014.0__cc4967777c49a3ff\GrapeCity.ActiveReports.Core.Diagnostics.dll</HintPath>
-    </Reference>
-    <Reference Include="GrapeCity.ActiveReports.Core.Drawing.Gdi">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\GrapeCity.ActiveReports.Core.Drawing.Gdi\v4.0_1.0.2014.0__cc4967777c49a3ff\GrapeCity.ActiveReports.Core.Drawing.Gdi.dll</HintPath>
-    </Reference>
-    <Reference Include="GrapeCity.ActiveReports.Core.Rdl">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\GrapeCity.ActiveReports.Core.Rdl\v4.0_1.0.2014.0__cc4967777c49a3ff\GrapeCity.ActiveReports.Core.Rdl.dll</HintPath>
-    </Reference>
-    <Reference Include="GrapeCity.ActiveReports.Core.Rendering">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\GrapeCity.ActiveReports.Core.Rendering\v4.0_1.0.2014.0__cc4967777c49a3ff\GrapeCity.ActiveReports.Core.Rendering.dll</HintPath>
-    </Reference>
-    <Reference Include="GrapeCity.ActiveReports.Document">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\GrapeCity.ActiveReports.Document\v4.0_13.1.16872.0__cc4967777c49a3ff\GrapeCity.ActiveReports.Document.dll</HintPath>
-    </Reference>
-    <Reference Include="GrapeCity.ActiveReports.Export.Pdf">
-      <HintPath>..\..\..\..\..\Windows\Microsoft.NET\assembly\GAC_MSIL\GrapeCity.ActiveReports.Export.Pdf\v4.0_13.1.16872.0__cc4967777c49a3ff\GrapeCity.ActiveReports.Export.Pdf.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
