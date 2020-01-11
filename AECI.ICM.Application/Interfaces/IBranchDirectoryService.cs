@@ -11,5 +11,7 @@ namespace AECI.ICM.Application.Interfaces
         IBranch LocateByFullBranchName(string fullBranchName, bool single);
 
         List<string> LocateByFullBranchName(string fullBranchname);
+
+        List<IBranch> GetAll();
     }
 }

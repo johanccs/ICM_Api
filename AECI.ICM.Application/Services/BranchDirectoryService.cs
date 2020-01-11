@@ -47,6 +47,11 @@ namespace AECI.ICM.Application.Services
             return GetByName(fullBranchName);
         }
 
+        public List<IBranch> GetAll()
+        {
+            return this.branches;
+        }
+
         public List<string> LocateByFullBranchName(string name)
         {
             if (name.ToLower() == RegionEnum.Inner.ToString().ToLower())
@@ -85,7 +90,7 @@ namespace AECI.ICM.Application.Services
             branchDir.Add(new Branch { SiteId = 51, AbbrevName = "COED", Fullname = "Coedmore" });
             branchDir.Add(new Branch { SiteId = 42, AbbrevName = "EIK", Fullname = "Eikenhof" });
             branchDir.Add(new Branch { SiteId = 43, AbbrevName = "RDP", Fullname = "Roodepoort" });
-            branchDir.Add(new Branch { SiteId = 82, AbbrevName = "EC", Fullname = "Eastern Cape" });
+            branchDir.Add(new Branch { SiteId = 82, AbbrevName = "ECA", Fullname = "Eastern Cape" });
             branchDir.Add(new Branch { SiteId = 84, AbbrevName = "UMT", Fullname = "Umtata" });
             branchDir.Add(new Branch { SiteId = 01, AbbrevName = "HO", Fullname = "Head Office" });
 

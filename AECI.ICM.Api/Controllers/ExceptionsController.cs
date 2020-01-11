@@ -15,15 +15,19 @@ namespace AECI.ICM.Api.Controllers
 
         private readonly ISettingsService _settingService;
         private readonly IResultService _resultService;
+        private readonly IBranchDirectoryService _branchDirectoryService;
+
 
         #endregion
 
         #region Constructor
 
-        public ExceptionsController(ISettingsService settingService, 
+        public ExceptionsController(ISettingsService settingService,
+                                    IBranchDirectoryService branchDirectoryService,
                                     IResultService resultService)
         {
             _settingService = settingService;
+            _branchDirectoryService = branchDirectoryService;
             _resultService = resultService;
         }
 
@@ -47,6 +51,23 @@ namespace AECI.ICM.Api.Controllers
             return Ok(false);
         }
 
+        [HttpGet]
+        [Route("getAll")]
+        public IActionResult GetAll()
+        {
+            var setting = GetSetting();
+            var cutOffDay = setting.WarningCuttOffDate.Day;
+
+            if (DateTime.Now.Day > cutOffDay)
+            {
+                var exceptions = GetExceptions(setting);
+
+                return Ok(exceptions);
+            }
+
+            return Ok();
+        }
+
         #endregion
 
         #region Private Methods
@@ -55,7 +76,7 @@ namespace AECI.ICM.Api.Controllers
         {
             var monthNo = DateTime.Now.Month;
             var results = GetResults(monthNo.ToString());
-
+          
             foreach(var result in results)
             {
                 if (result.Branch == site)
@@ -63,6 +84,30 @@ namespace AECI.ICM.Api.Controllers
             }
 
             return true;
+        }
+
+        private List<ResultEntity> GetExceptions(SettingEntity setting)
+        {
+            var monthNo = DateTime.Now.Month;
+            var results = GetResults(monthNo.ToString());
+            var exceptions = new List<ResultEntity>();
+            var allBranches = _branchDirectoryService.GetAll();
+
+            foreach (var branch in allBranches)
+            {
+                var result = results.FirstOrDefault(p => p.Branch == branch.AbbrevName);
+                if (result == null)
+                {
+                    var settingEmail = setting.Emails.FirstOrDefault(p => 
+                                    p.Site.ToLower() == branch.AbbrevName.ToLower());
+                    var exception = new ResultEntity { BMName = settingEmail.BranchManagerName, Branch = branch.AbbrevName, 
+                                                       FinName = settingEmail.RegionalAccountantName, Month = monthNo.ToString() };
+
+                    exceptions.Add(exception);
+                }
+            }
+
+            return exceptions;
         }
 
         private SettingEntity GetSetting()

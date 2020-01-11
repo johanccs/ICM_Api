@@ -58,7 +58,7 @@ namespace AECI.ICM.Api.Controllers
         }
 
         [HttpPost]       
-        public async Task<IActionResult> Post(ResponseViewModel args)
+        public async Task<FileResult> Post(ResponseViewModel args)
         {
             HttpResponseMessage response = null;
             args.BMSigPath = BuildSignaturePath(args);
@@ -87,15 +87,14 @@ namespace AECI.ICM.Api.Controllers
                         var path = response.Content.ReadAsStringAsync().Result;
                         var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
 
-                       if( EmailReport(deserialisedPath, args.Branch))
-                        {
-                            byte[] filebytes = System.IO.File.ReadAllBytes(deserialisedPath);
-                            var file = Path.GetFileName(path);
+                        EmailReport(deserialisedPath, args.Branch);
 
-                            return File(filebytes, System.Net.Mime.MediaTypeNames.Application.Pdf, file);
-                        }
+                        byte[] filebytes = System.IO.File.ReadAllBytes(deserialisedPath);
+                        var file = Path.GetFileName(path);
 
-                        return Ok(path);
+                        return File(filebytes, System.Net.Mime.MediaTypeNames.Application.Pdf, file);
+                        //return Ok(path);
+                      
                     }
                     else
                     {
@@ -103,13 +102,15 @@ namespace AECI.ICM.Api.Controllers
                         builder.AppendLine(response.ReasonPhrase);
                         builder.AppendLine("Ensure that print service is running and");
                         builder.AppendLine("the report is not open already");
-                        return BadRequest(builder.ToString());
+                        //return BadRequest(builder.ToString());
+                        return null;
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest(ex.Message);
+                //return BadRequest(ex.Message);
+                return null;
             }
         }
 
@@ -145,11 +146,14 @@ namespace AECI.ICM.Api.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("{filename}")]
         [Route("getPdf")]
-        public HttpResponseMessage GetPdf()
+        public FileResult GetPdf(string filename)
         {
-            return null;
+            byte[] filebytes = System.IO.File.ReadAllBytes(filename);
+            var file = Path.GetFileName(filename);
+
+            return File(filebytes, System.Net.Mime.MediaTypeNames.Application.Pdf, file);
         }
 
         #endregion
@@ -205,7 +209,7 @@ namespace AECI.ICM.Api.Controllers
 
                 _notificationService.Body = BuildBody(site);
                 _notificationService.From = "muchreply@muchasphalt.com";
-                _notificationService.Server = "smtp.saix.net";
+                _notificationService.Server = "muchsmtp";
                 _notificationService.Subject = $"ICM report - {DateTime.Now.ToShortDateString()}";
                 _notificationService.To = mailTo;
                 _notificationService.AttachmentPath = reportPath;
