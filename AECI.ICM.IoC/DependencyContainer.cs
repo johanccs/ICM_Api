@@ -27,6 +27,7 @@ namespace AECI.ICM.IoC
             services.AddScoped<INotificationService, NotificationService>();
             services.AddSingleton<IBranchDirectoryService, BranchDirectoryService>();
             services.AddScoped<IBranch, Branch>();
+            services.AddScoped<ICMFileService, ICMFileService>();
           
             services.AddDbContext<ICMDbContext>(options =>
             {

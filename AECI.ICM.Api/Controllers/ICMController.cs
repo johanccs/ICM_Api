@@ -58,15 +58,15 @@ namespace AECI.ICM.Api.Controllers
         }
 
         [HttpPost]       
-        public async Task<FileResult> Post(ResponseViewModel args)
+        public async Task<FileResult> Post(ResponseViewModel request)
         {
             HttpResponseMessage response = null;
-            args.BMSigPath = BuildSignaturePath(args);
-            args.FinSigPath = BuildFinSigPath();
+            request.BMSigPath = BuildSignaturePath(request);
+            request.FinSigPath = BuildFinSigPath();
 
             try
             {
-                _icmService.Add(args);
+                _icmService.Add(request);
 
                 using (var client = new HttpClient())
                 {
@@ -77,7 +77,7 @@ namespace AECI.ICM.Api.Controllers
                                     new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(
                                     "application/json"));
 
-                    var serialised = JsonConvert.SerializeObject(args);
+                    var serialised = JsonConvert.SerializeObject(request);
                     var param = new StringContent(serialised, Encoding.UTF8, "application/json");
 
                     response = await client.PostAsync("api/Print/PrintReport", param);
@@ -87,7 +87,7 @@ namespace AECI.ICM.Api.Controllers
                         var path = response.Content.ReadAsStringAsync().Result;
                         var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
 
-                        EmailReport(deserialisedPath, args.Branch);
+                        EmailReport(deserialisedPath, request.Branch);
 
                         byte[] filebytes = System.IO.File.ReadAllBytes(deserialisedPath);
                         var file = Path.GetFileName(path);
