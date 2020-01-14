@@ -10,7 +10,7 @@
                 public string FileName { get; set; }
                 public long Size { get; set; }
                 public int? Month { get; set; }
-
+                public int Year { get; set; }
             }
         }
     }

@@ -146,14 +146,17 @@ namespace AECI.ICM.Api.Controllers
             }
         }
 
-        [HttpGet("{filename}")]
+        [HttpPost]
         [Route("getPdf")]
-        public FileResult GetPdf(string filename)
+        public FileResult GetPdf(Application.Commands.ICM.V1.Reprint request)
         {
-            byte[] filebytes = System.IO.File.ReadAllBytes(filename);
-            var file = Path.GetFileName(filename);
+            var folder = "D:\\TestReports\\";
+            var file = Path.Combine(folder,request.Branch,request.FileName);
 
-            return File(filebytes, System.Net.Mime.MediaTypeNames.Application.Pdf, file);
+            byte[] filebytes = System.IO.File.ReadAllBytes(file);
+            var filename = Path.GetFileName(file);
+
+            return File(filebytes, System.Net.Mime.MediaTypeNames.Application.Pdf, filename);
         }
 
         #endregion
@@ -237,13 +240,13 @@ namespace AECI.ICM.Api.Controllers
             return sb.ToString();
         }
 
-        public FileStreamResult DeSerialize(string filePath)
-        {
-            var stream = new FileStream(filePath, FileMode.Open);
-            //var stream = new FileStream(@"C:\TestReports\t.pdf", FileMode.Open);
+        //public FileStreamResult DeSerialize(string filePath)
+        //{
+        //    var stream = new FileStream(filePath, FileMode.Open);
+        //    //var stream = new FileStream(@"C:\TestReports\t.pdf", FileMode.Open);
 
-            return new FileStreamResult(stream, "application/pdf");
-        }
+        //    return new FileStreamResult(stream, "application/pdf");
+        //}
 
         #endregion
     }
