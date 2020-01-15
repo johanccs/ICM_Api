@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
 
 namespace AECI.ICM.Api.Controllers
 {
@@ -40,7 +41,12 @@ namespace AECI.ICM.Api.Controllers
         {
             try
             {
-                var loggedUser = Authenticate(request.Username);
+                if (_debug == SystemStatusEnum.Prod)
+                {
+                    if (!Authenticate(request))
+                        return Unauthorized("Invalid username or password");
+                }
+                var loggedUser = QueryADUser(request.Username);
                 loggedUser.Site = _branchDirectoryService
                                    .LocateByFullBranchName(loggedUser.Site,true)
                                    .AbbrevName;
@@ -68,21 +74,20 @@ namespace AECI.ICM.Api.Controllers
         {
             try
             {
-                var loggedUser = Authenticate(username);
+                var loggedUser = QueryADUser(username);
                 var branches = _branchDirectoryService.LocateByFullBranchName(loggedUser.Site);
 
                 return Ok(branches);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return BadRequest(ex.Message);
             }
         }
 
         #region Private Methods
 
-        public ILoginCommand Authenticate(string username)
+        private ILoginCommand QueryADUser(string username)
         {
             try
             {
@@ -100,11 +105,7 @@ namespace AECI.ICM.Api.Controllers
                         using (DirectorySearcher searcher = new DirectorySearcher(entry))
                         {
                             searcher.Filter = $"SAMAccountName={username}";
-                            //searcher.PropertiesToLoad.Add("DisplayName");
-                            //searcher.PropertiesToLoad.Add("SAMAccountName");
-                            //searcher.PropertiesToLoad.Add("Mail");
-                            //searcher.PropertiesToLoad.Add("");
-
+                       
                             var result = searcher.FindAll();
 
                             foreach (SearchResult sr in result)
@@ -142,6 +143,16 @@ namespace AECI.ICM.Api.Controllers
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        private bool Authenticate(Login.V1.Login request)
+        {
+            using(PrincipalContext pc = new PrincipalContext(ContextType.Domain, "192.168.210.45"))
+            {
+                bool isValid = pc.ValidateCredentials(request.Username, request.Password);
+
+                return isValid;
             }
         }
 

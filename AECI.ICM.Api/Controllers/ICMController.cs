@@ -82,14 +82,13 @@ namespace AECI.ICM.Api.Controllers
 
             try
             {
-                _icmService.Add(request);
-
                 using (var client = new HttpClient())
                 {
                     var debugReportApi = _config[ApiConstants.DEBUGREPORTAPIURL];
                     var prodReportApi = _config[ApiConstants.PRODREPORTAPIURL];
                     
-                    if(_systemStatus.ToLower() == "debug".ToLower())
+                    if(_systemStatus.ToLower() == "debug".ToLower() || 
+                       _systemStatus.ToLower() == "Test".ToLower())
                         client.BaseAddress = new Uri(debugReportApi);
                     else
                         client.BaseAddress = new Uri(prodReportApi);
@@ -110,6 +109,7 @@ namespace AECI.ICM.Api.Controllers
                         var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
 
                         EmailReport(deserialisedPath, request.Branch);
+                        _icmService.Add(request);
 
                         byte[] filebytes = System.IO.File.ReadAllBytes(deserialisedPath);
                         var file = Path.GetFileName(path);
@@ -185,6 +185,10 @@ namespace AECI.ICM.Api.Controllers
         private string BuildSignaturePath(ResponseViewModel args)
         {
             var sigPath = _baseReportPath;
+
+            if(!sigPath.EndsWith(@"\"))
+                sigPath = $"{sigPath}\\";
+
             if (args.Branch.ToLower() == "GEO".ToLower())
                 sigPath += @"GEO\";
             
@@ -233,6 +237,9 @@ namespace AECI.ICM.Api.Controllers
             else if (args.Branch.ToLower() == "HO".ToLower())
                 sigPath += @"HO\";
 
+            else if (args.Branch.ToLower() == "PMB".ToLower())
+                sigPath += @"PMB\";
+
             else if (args.Branch.ToLower() == "UMT".ToLower())
                 sigPath += @"UMT\";
             else
@@ -241,7 +248,7 @@ namespace AECI.ICM.Api.Controllers
                 return sigPath;
             }
 
-            sigPath += "bmsig.jpg";
+            sigPath += "bmsig.png";
 
             if (System.IO.File.Exists(sigPath))
                 return sigPath;
@@ -252,12 +259,15 @@ namespace AECI.ICM.Api.Controllers
         private string BuildFinSigPath()
         {
             var basePath = _baseReportPath;
+            if (!basePath.EndsWith(@"\"))
+                basePath = $"{basePath}\\";
+
             var finsigPath = basePath;
             finsigPath += "finsig.png";
 
             var nosigPath = basePath += "NoSig.png";
 
-            if (!System.IO.File.Exists(basePath))
+            if (!System.IO.File.Exists(finsigPath))
                 return nosigPath;
 
             return finsigPath;

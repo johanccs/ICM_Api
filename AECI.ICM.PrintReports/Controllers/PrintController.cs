@@ -42,15 +42,6 @@ namespace AECI.ICM.PrintReports.Controllers
             {
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message);
             }
-            finally
-            {
-                imgPath = null;
-                filePath = null;
-                fileName = null;
-                fullPath = null;
-                docEx = null;
-                report = null;
-            }
         }
 
         private arICM BuildReport(ResponseViewModel param, string imgPath)

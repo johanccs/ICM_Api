@@ -77,7 +77,7 @@ namespace AECI.ICM.Application.Services
         {
             List<IBranch> branchDir = new List<IBranch>();
             branchDir.Add(new Branch { SiteId = 11, AbbrevName = "ER", Fullname = "Eerste River"});
-            branchDir.Add(new Branch { SiteId = 14, AbbrevName = "CK", Fullname = "Contermans Kloof"});
+            branchDir.Add(new Branch { SiteId = 14, AbbrevName = "CK", Fullname = "Contermanskloof"});
             branchDir.Add(new Branch { SiteId = 23, AbbrevName = "GEO", Fullname = "George" } );
             branchDir.Add(new Branch { SiteId = 21, AbbrevName = "PE", Fullname = "Port Elizabeth"});
             branchDir.Add(new Branch { SiteId = 41, AbbrevName = "BEN", Fullname = "Benoni"});
@@ -92,6 +92,7 @@ namespace AECI.ICM.Application.Services
             branchDir.Add(new Branch { SiteId = 43, AbbrevName = "RDP", Fullname = "Roodepoort" });
             branchDir.Add(new Branch { SiteId = 82, AbbrevName = "ECA", Fullname = "Eastern Cape" });
             branchDir.Add(new Branch { SiteId = 84, AbbrevName = "UMT", Fullname = "Umtata" });
+            branchDir.Add(new Branch { SiteId = 58, AbbrevName = "PMB", Fullname = "Pietermaritzburg" });
             branchDir.Add(new Branch { SiteId = 01, AbbrevName = "HO", Fullname = "Head Office" });
 
             return branchDir;
@@ -107,6 +108,9 @@ namespace AECI.ICM.Application.Services
 
         private IBranch GetByName(string name)
         {
+            if (branches == null || branches.Count == 0)
+                LoadBranches();
+
             if (branches.Any(p => p.Fullname == name))
                 return branches.SingleOrDefault(p => p.Fullname == name);
             else
