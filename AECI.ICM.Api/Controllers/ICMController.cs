@@ -1,7 +1,9 @@
-﻿using AECI.ICM.Application.Interfaces;
+﻿using AECI.ICM.Api.Constants;
+using AECI.ICM.Application.Interfaces;
 using AECI.ICM.Domain.Interfaces;
 using AECI.ICM.Shared.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -21,6 +23,15 @@ namespace AECI.ICM.Api.Controllers
         private readonly IICMService _icmService;
         private readonly INotificationService _notificationService;
         private readonly ISettingsService _settingsService;
+        private readonly IConfiguration _config;
+        private readonly string _systemStatus;
+        private readonly string _smtp;
+       
+        #endregion
+
+        #region Fields
+
+        private string _baseReportPath;
 
         #endregion
 
@@ -28,11 +39,16 @@ namespace AECI.ICM.Api.Controllers
 
         public ICMController(IICMService icmService, 
                              INotificationService notificationService,
+                             IConfiguration config,
                              ISettingsService settingsService)
         {
             _icmService = icmService;
             _notificationService = notificationService;
+            _config = config;
             _settingsService = settingsService;
+            _systemStatus = _config[ApiConstants.SYSTEMSTATUS];
+            _baseReportPath = config[ApiConstants.BASEREPORTFOLDER];
+            _smtp = config[ApiConstants.SMTPServer];
         }
 
         #endregion
@@ -70,8 +86,14 @@ namespace AECI.ICM.Api.Controllers
 
                 using (var client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri("http://localhost:62176/");
-                    //client.BaseAddress = new Uri("http://madev04:8090/");
+                    var debugReportApi = _config[ApiConstants.DEBUGREPORTAPIURL];
+                    var prodReportApi = _config[ApiConstants.PRODREPORTAPIURL];
+                    
+                    if(_systemStatus.ToLower() == "debug".ToLower())
+                        client.BaseAddress = new Uri(debugReportApi);
+                    else
+                        client.BaseAddress = new Uri(prodReportApi);
+
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(
                                     new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(
@@ -92,9 +114,7 @@ namespace AECI.ICM.Api.Controllers
                         byte[] filebytes = System.IO.File.ReadAllBytes(deserialisedPath);
                         var file = Path.GetFileName(path);
 
-                        return File(filebytes, System.Net.Mime.MediaTypeNames.Application.Pdf, file);
-                        //return Ok(path);
-                      
+                        return File(filebytes, System.Net.Mime.MediaTypeNames.Application.Pdf, file);                      
                     }
                     else
                     {
@@ -102,14 +122,13 @@ namespace AECI.ICM.Api.Controllers
                         builder.AppendLine(response.ReasonPhrase);
                         builder.AppendLine("Ensure that print service is running and");
                         builder.AppendLine("the report is not open already");
-                        //return BadRequest(builder.ToString());
+            
                         return null;
                     }
                 }
             }
             catch (Exception)
             {
-                //return BadRequest(ex.Message);
                 return null;
             }
         }
@@ -165,16 +184,57 @@ namespace AECI.ICM.Api.Controllers
 
         private string BuildSignaturePath(ResponseViewModel args)
         {
-            var basePath = @"D:\TestReports\";
-            var sigPath = basePath;
+            var sigPath = _baseReportPath;
             if (args.Branch.ToLower() == "GEO".ToLower())
                 sigPath += @"GEO\";
-            else if (args.Branch.ToLower() == "UMT".ToLower())
-                sigPath += @"UMT\";
+            
+            else if (args.Branch.ToLower() == "ER".ToLower())
+                sigPath += @"ER\";
+            
+            else if (args.Branch.ToLower() == "CK".ToLower())
+                sigPath += @"CK\";
+
+            else if (args.Branch.ToLower() == "PE".ToLower())
+                sigPath += @"PE\";
+
+            else if (args.Branch.ToLower() == "BEN".ToLower())
+                sigPath += @"BEN\";
+
+            else if (args.Branch.ToLower() == "BEN2".ToLower())
+                sigPath += @"BEN2\";
+
             else if (args.Branch.ToLower() == "POM".ToLower())
                 sigPath += @"POM\";
+
+            else if (args.Branch.ToLower() == "POL".ToLower())
+                sigPath += @"POL\";
+
+            else if (args.Branch.ToLower() == "Wit".ToLower())
+                sigPath += @"Wit\";
+
             else if (args.Branch.ToLower() == "EMP".ToLower())
                 sigPath += @"EMP\";
+
+            else if (args.Branch.ToLower() == "BFN".ToLower())
+                sigPath += @"BFN\";
+
+            else if (args.Branch.ToLower() == "COED".ToLower())
+                sigPath += @"COED\";
+
+            else if (args.Branch.ToLower() == "EIK".ToLower())
+                sigPath += @"EIK\";
+
+            else if (args.Branch.ToLower() == "RDP".ToLower())
+                sigPath += @"RDP\";
+
+            else if (args.Branch.ToLower() == "ECA".ToLower())
+                sigPath += @"ECA\";
+
+            else if (args.Branch.ToLower() == "HO".ToLower())
+                sigPath += @"HO\";
+
+            else if (args.Branch.ToLower() == "UMT".ToLower())
+                sigPath += @"UMT\";
             else
             {
                 sigPath += "NoSig.png";
@@ -186,12 +246,12 @@ namespace AECI.ICM.Api.Controllers
             if (System.IO.File.Exists(sigPath))
                 return sigPath;
 
-            return basePath += "NoSig.png";
+            return _baseReportPath += "NoSig.png";
         }
 
         private string BuildFinSigPath()
         {
-            var basePath = @"D:\TestReports\";
+            var basePath = _baseReportPath;
             var finsigPath = basePath;
             finsigPath += "finsig.png";
 
@@ -212,7 +272,7 @@ namespace AECI.ICM.Api.Controllers
 
                 _notificationService.Body = BuildBody(site);
                 _notificationService.From = "muchreply@muchasphalt.com";
-                _notificationService.Server = "muchsmtp";
+                _notificationService.Server =_smtp;
                 _notificationService.Subject = $"ICM report - {DateTime.Now.ToShortDateString()}";
                 _notificationService.To = mailTo;
                 _notificationService.AttachmentPath = reportPath;
@@ -239,14 +299,6 @@ namespace AECI.ICM.Api.Controllers
 
             return sb.ToString();
         }
-
-        //public FileStreamResult DeSerialize(string filePath)
-        //{
-        //    var stream = new FileStream(filePath, FileMode.Open);
-        //    //var stream = new FileStream(@"C:\TestReports\t.pdf", FileMode.Open);
-
-        //    return new FileStreamResult(stream, "application/pdf");
-        //}
 
         #endregion
     }
