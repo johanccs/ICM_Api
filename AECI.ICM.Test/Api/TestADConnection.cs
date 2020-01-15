@@ -1,5 +1,6 @@
 ﻿using AECI.ICM.Api.Controllers;
 using AECI.ICM.Api.ViewModels;
+using AECI.ICM.Application.Services;
 using Xunit;
 
 namespace AECI.ICM.Test.Api
@@ -9,7 +10,7 @@ namespace AECI.ICM.Test.Api
         [Fact]
         public void TestADSearchFunc()
         {
-            var loginCtrl = new LoginController();
+            var loginCtrl = new LoginController(new BranchDirectoryService());
             loginCtrl.Authenticate( "mrma86423");
         }
     }

@@ -1,11 +1,14 @@
-﻿using AECI.ICM.Api.ViewModels;
+﻿using AECI.ICM.Api.Constants;
+using AECI.ICM.Api.ViewModels;
 using AECI.ICM.Application.ApplicationEnums;
 using AECI.ICM.Application.ApplicationExceptions;
 using AECI.ICM.Application.Commands;
 using AECI.ICM.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
 
 namespace AECI.ICM.Api.Controllers
 {
@@ -15,17 +18,20 @@ namespace AECI.ICM.Api.Controllers
     {
         #region Private readonly fields
 
-        private SystemStatusEnum debug;
+        private SystemStatusEnum _debug;
         private readonly IBranchDirectoryService _branchDirectoryService;
-      
+        private readonly IConfiguration _config;
+
         #endregion
 
         #region Constructor
 
-        public LoginController(IBranchDirectoryService branchDirectory)
+        public LoginController(IBranchDirectoryService branchDirectory, 
+                               IConfiguration config)
         {
             _branchDirectoryService = branchDirectory;
-            debug = SystemStatusEnum.Debug;
+            _config = config;
+            _debug = (SystemStatusEnum)Enum.Parse(typeof(SystemStatusEnum), _config[ApiConstants.SYSTEMSTATUS]);
         }
 
         #endregion
@@ -35,7 +41,12 @@ namespace AECI.ICM.Api.Controllers
         {
             try
             {
-                var loggedUser = Authenticate(request.Username);
+                if (_debug == SystemStatusEnum.Prod)
+                {
+                    if (!Authenticate(request))
+                        return Unauthorized("Invalid username or password");
+                }
+                var loggedUser = QueryADUser(request.Username);
                 loggedUser.Site = _branchDirectoryService
                                    .LocateByFullBranchName(loggedUser.Site,true)
                                    .AbbrevName;
@@ -63,25 +74,24 @@ namespace AECI.ICM.Api.Controllers
         {
             try
             {
-                var loggedUser = Authenticate(username);
+                var loggedUser = QueryADUser(username);
                 var branches = _branchDirectoryService.LocateByFullBranchName(loggedUser.Site);
 
                 return Ok(branches);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return BadRequest(ex.Message);
             }
         }
 
         #region Private Methods
 
-        public ILoginCommand Authenticate(string username)
+        private ILoginCommand QueryADUser(string username)
         {
             try
             {
-                if (debug == SystemStatusEnum.Debug)
+                if (_debug == SystemStatusEnum.Debug)
                     throw new AuthException(@"ma\majobs", "AD connection could not be established");
 
                     var domPassword = "6a13tatqd9XRFkNUOFsC55GUrmiAjKelHokNDS2nW4u7Ipf2sswbUYDLMVXmkOq";
@@ -95,11 +105,7 @@ namespace AECI.ICM.Api.Controllers
                         using (DirectorySearcher searcher = new DirectorySearcher(entry))
                         {
                             searcher.Filter = $"SAMAccountName={username}";
-                            //searcher.PropertiesToLoad.Add("DisplayName");
-                            //searcher.PropertiesToLoad.Add("SAMAccountName");
-                            //searcher.PropertiesToLoad.Add("Mail");
-                            //searcher.PropertiesToLoad.Add("");
-
+                       
                             var result = searcher.FindAll();
 
                             foreach (SearchResult sr in result)
@@ -109,12 +115,12 @@ namespace AECI.ICM.Api.Controllers
                                 user.Username = sr.Properties["samaccountname"][0].ToString();
                                 user.DisplayName = sr.Properties["displayname"][0].ToString();
 
-                                user.SystemStatus = SystemStatusEnum.Test.ToString();
+                                user.SystemStatus = _debug.ToString();
 
                             if (sr.Properties["office"].Count > 0)
-                                user.Site = sr.Properties["office"].ToString();
+                                user.Site = sr.Properties["office"][0].ToString();
                             else
-                                user.Site = sr.Properties["streetaddress"].ToString();
+                                user.Site = sr.Properties["physicaldeliveryofficename"][0].ToString();
                             }
                         }
                     }
@@ -137,6 +143,16 @@ namespace AECI.ICM.Api.Controllers
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        private bool Authenticate(Login.V1.Login request)
+        {
+            using(PrincipalContext pc = new PrincipalContext(ContextType.Domain, "192.168.210.45"))
+            {
+                bool isValid = pc.ValidateCredentials(request.Username, request.Password);
+
+                return isValid;
             }
         }
 

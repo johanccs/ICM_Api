@@ -1,9 +1,10 @@
-﻿using AECI.ICM.Application.Commands;
+﻿using AECI.ICM.Api.Constants;
+using AECI.ICM.Application.Commands;
 using AECI.ICM.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
-using System.Text;
 
 namespace AECI.ICM.Api.Controllers
 {
@@ -15,16 +16,19 @@ namespace AECI.ICM.Api.Controllers
 
         private readonly INotificationService _notificationService;
         private readonly ISettingsService _settingsService;
+        private readonly IConfiguration _config;
 
         #endregion
 
         #region Constructor
 
-        public NotificationController(INotificationService notificationService, 
-                                      ISettingsService _settingsService)
+        public NotificationController(INotificationService notificationService,
+                                      IConfiguration config,
+                                      ISettingsService settingsService)
         {
             _notificationService = notificationService;
-            this._settingsService = _settingsService;
+            _config = config;
+            _settingsService = settingsService;
         }
 
         #endregion
@@ -57,10 +61,11 @@ namespace AECI.ICM.Api.Controllers
             {
                 var setting = _settingsService.GetAllAsync();
                 var mailTo = setting.Emails.FirstOrDefault(p => p.Site == request.Branch).BranchManagerEmail.Trim();
+                var smtp = _config[ApiConstants.SMTPServer];
 
                 _notificationService.Body = request.Message;
                 _notificationService.From = setting.WarningEmail;
-                _notificationService.Server = "muchsmtp";
+                _notificationService.Server = smtp;
                 _notificationService.Subject = request.Subject;
                 _notificationService.To = mailTo;
 
