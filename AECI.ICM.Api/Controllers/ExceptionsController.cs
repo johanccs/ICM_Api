@@ -68,6 +68,23 @@ namespace AECI.ICM.Api.Controllers
             return Ok();
         }
 
+        [HttpGet]
+        [Route("getByMonthNo/{num}")]
+        public IActionResult GetByMonthNo(string num)
+        {
+            var setting = GetSetting();
+            var cutOffDay = setting.WarningCuttOffDate.Day;
+
+            if (DateTime.Now.Day > cutOffDay)
+            {
+                var exceptions = GetExceptions(setting).Where(p=>p.Month == num);
+
+                return Ok(exceptions);
+            }
+
+            return Ok();
+        }
+
         #endregion
 
         #region Private Methods
