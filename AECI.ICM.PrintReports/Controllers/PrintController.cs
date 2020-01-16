@@ -14,8 +14,8 @@ namespace AECI.ICM.PrintReports.Controllers
     {   
         public HttpResponseMessage PrintReport(ResponseViewModel param)
         {
-            var imgPath = @"D:\TestReports\MuchLogo.png";
-            var filePath = CreateFilePath(param, @"D:\TestReports\");
+            var imgPath = @"C:\TestReports\MuchLogo.png";
+            var filePath = CreateFilePath(param, @"C:\TestReports\");
             var fileName = CreateFileName(param);
             var ext = "pdf";
             var fullPath = Path.Combine(filePath, fileName);
@@ -35,11 +35,14 @@ namespace AECI.ICM.PrintReports.Controllers
                 {
                     docEx.Export(report.Document, stream);
                 }
-               
+
+                Logging("Report created");
+
                 return Request.CreateResponse(HttpStatusCode.OK, fullPath);
             }
             catch (Exception ex)
             {
+                Logging(ex.Message);
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.Message);
             }
         }
@@ -93,7 +96,10 @@ namespace AECI.ICM.PrintReports.Controllers
         {
             try
             {
-                using(var sr = new StreamWriter(@"C:\TestReports\Exceptions.txt",true))
+                if (!Directory.Exists("C:\\TestReports\\Exceptions"))
+                    Directory.CreateDirectory("C:\\TestReports\\Exceptions");
+
+                using (var sr = new StreamWriter(@"C:\TestReports\Exceptions\Exceptions.txt",true))
                 {
                     sr.WriteLine(msg);
                     sr.Flush();
