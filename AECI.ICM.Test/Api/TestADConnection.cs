@@ -10,8 +10,8 @@ namespace AECI.ICM.Test.Api
         [Fact]
         public void TestADSearchFunc()
         {
-            var loginCtrl = new LoginController(new BranchDirectoryService());
-            loginCtrl.Authenticate( "mrma86423");
+            //var loginCtrl = new LoginController(new BranchDirectoryService(), new OnlineLogger(),);
+            //loginCtrl.Authenticate( "mrma86423");
         }
     }
 }

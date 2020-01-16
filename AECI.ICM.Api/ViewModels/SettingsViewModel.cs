@@ -14,7 +14,7 @@ namespace AECI.ICM.Api.ViewModels
         public DateTime WarningCuttOffDate { get; set; }
         public string WarningEmail { get; set; }
         public int SettingId { get; set; }
-
+        public string OnlineApiUrl { get; set; }
         public List<SettingEmailEntity> Emails { get; set; } = new List<SettingEmailEntity>();
 
         #endregion

@@ -11,7 +11,7 @@ namespace AECI.ICM.Domain.Entities
         public bool EnableWarning { get; set; }
         public DateTime WarningCuttOffDate { get; set; }
         public string WarningEmail { get; set; }
-
+        public string OnlineApiUrl { get; set; }
         public List<SettingEmailEntity> Emails { get; set; } = new List<SettingEmailEntity>();
     }
 }

@@ -4,6 +4,7 @@ using AECI.ICM.Application.ApplicationEnums;
 using AECI.ICM.Application.ApplicationExceptions;
 using AECI.ICM.Application.Commands;
 using AECI.ICM.Application.Interfaces;
+using AECI.ICM.Application.Models.MessageTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -21,17 +22,23 @@ namespace AECI.ICM.Api.Controllers
         private SystemStatusEnum _debug;
         private readonly IBranchDirectoryService _branchDirectoryService;
         private readonly IConfiguration _config;
+        private readonly ILogger _logger;
 
         #endregion
 
         #region Constructor
 
-        public LoginController(IBranchDirectoryService branchDirectory, 
+        public LoginController(IBranchDirectoryService branchDirectory,
+                               ILogger logger,
                                IConfiguration config)
         {
             _branchDirectoryService = branchDirectory;
+            _logger = logger;
             _config = config;
-            _debug = (SystemStatusEnum)Enum.Parse(typeof(SystemStatusEnum), _config[ApiConstants.SYSTEMSTATUS]);
+
+            _debug = (SystemStatusEnum)Enum.Parse(typeof(SystemStatusEnum), 
+                    _config[ApiConstants.SYSTEMSTATUS]);
+
         }
 
         #endregion
@@ -47,19 +54,14 @@ namespace AECI.ICM.Api.Controllers
                         return Unauthorized("Invalid username or password");
                 }
                 var loggedUser = QueryADUser(request.Username);
-                loggedUser.Site = _branchDirectoryService
-                                   .LocateByFullBranchName(loggedUser.Site,true)
-                                   .AbbrevName;
+                loggedUser = SetSiteAbbreviation(loggedUser);
                
-                if (string.IsNullOrEmpty(loggedUser.Email) && 
-                    string.IsNullOrEmpty(loggedUser.DisplayName) &&
-                    string.IsNullOrEmpty(loggedUser.Username))
-                        return NotFound(0);
+                if (ValidateLoggedUser(loggedUser))
+                    return NotFound(0);
 
-                if (loggedUser.ADUser == "mrma86423")
-                    loggedUser.Role = Enums.Enums.RoleEnum.Administrator.ToString();
-                else
-                    loggedUser.Role = Enums.Enums.RoleEnum.User.ToString();
+                loggedUser = SetRoles(loggedUser);
+
+                LogToOnlineApi(request, "User has logged on at");
 
                 return Ok(loggedUser);
             }
@@ -86,6 +88,39 @@ namespace AECI.ICM.Api.Controllers
         }
 
         #region Private Methods
+
+        private void LogToOnlineApi(Login.V1.Login request, string message)
+        {
+            _logger.LogAsync(new InfoMessage().Set(
+                      $"{message} {DateTime.Now}",
+                      request.Site, request.Username
+                ), "http://localhost:5001");
+        }
+
+        private ILoginCommand SetSiteAbbreviation(ILoginCommand loggedUser)
+        {
+            loggedUser.Site = _branchDirectoryService
+                                .LocateByFullBranchName(loggedUser.Site, true)
+                                .AbbrevName;
+            return loggedUser;
+        }
+
+        private bool ValidateLoggedUser(ILoginCommand loggedUser)
+        {
+            return (string.IsNullOrEmpty(loggedUser.Email) &&
+                    string.IsNullOrEmpty(loggedUser.DisplayName) &&
+                    string.IsNullOrEmpty(loggedUser.Username));
+        }
+
+        private ILoginCommand SetRoles(ILoginCommand loggedUser)
+        {
+            if (loggedUser.ADUser == "mrma86423")
+                loggedUser.Role = Enums.Enums.RoleEnum.Administrator.ToString();
+            else
+                loggedUser.Role = Enums.Enums.RoleEnum.User.ToString();
+
+            return loggedUser;
+        }
 
         private ILoginCommand QueryADUser(string username)
         {

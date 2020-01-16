@@ -28,6 +28,7 @@ namespace AECI.ICM.IoC
             services.AddSingleton<IBranchDirectoryService, BranchDirectoryService>();
             services.AddScoped<IBranch, Branch>();
             services.AddScoped<ICMFileService, ICMFileService>();
+            services.AddScoped<ILogger, OnlineLogger>();
           
             services.AddDbContext<ICMDbContext>(options =>
             {

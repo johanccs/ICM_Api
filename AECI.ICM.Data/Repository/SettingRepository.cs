@@ -6,7 +6,6 @@ using AECI.ICM.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace AECI.ICM.Data.Repository
 {
@@ -116,6 +115,7 @@ namespace AECI.ICM.Data.Repository
             mapped.SignatureLocation = settings.SignatureLocation;
             mapped.WarningCuttOffDate = settings.WarningCuttOffDate;
             mapped.WarningEmail = settings.WarningEmail;
+            mapped.OnlineApiUrl = settings.OnlineApiUrl;
 
             settings.Emails.ForEach(p =>
             {
@@ -143,6 +143,7 @@ namespace AECI.ICM.Data.Repository
             reverse.SignatureLocation = settings.SignatureLocation;
             reverse.WarningCuttOffDate = settings.WarningCuttOffDate;
             reverse.WarningEmail = settings.WarningEmail;
+            reverse.OnlineApiUrl = settings.OnlineApiUrl;
 
             settings.Emails.ForEach(p =>
             {

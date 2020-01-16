@@ -12,6 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AECI.ICM.Data\AECI.ICM.Data.csproj" />
     <ProjectReference Include="..\AECI.ICM.Domain\AECI.ICM.Domain.csproj" />
     <ProjectReference Include="..\AECI.ICM.Shared\AECI.ICM.Shared.csproj" />
   </ItemGroup>

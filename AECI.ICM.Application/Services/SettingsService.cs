@@ -1,4 +1,5 @@
 ﻿using AECI.ICM.Application.Interfaces;
+using AECI.ICM.Data.Context;
 using AECI.ICM.Domain.Entities;
 using AECI.ICM.Domain.Interfaces;
 using System;
@@ -10,7 +11,7 @@ namespace AECI.ICM.Application.Services
         #region Readonly Fields
 
         private readonly ISettingRepository _settingsRepo;
-
+      
         #endregion
 
         #region Constructor
