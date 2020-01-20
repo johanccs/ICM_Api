@@ -74,11 +74,13 @@ namespace AECI.ICM.Api.Controllers
         }
 
         [HttpPost]       
-        public async Task<FileResult> Post(ResponseViewModel request)
+        public async Task<ActionResult> Post(ResponseViewModel request)
         {
             HttpResponseMessage response = null;
             request.BMSigPath = BuildSignaturePath(request);
             request.FinSigPath = BuildFinSigPath();
+
+            _icmService.Add(request);
 
             try
             {
@@ -109,7 +111,6 @@ namespace AECI.ICM.Api.Controllers
                         var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
 
                         EmailReport(deserialisedPath, request.Branch);
-                        _icmService.Add(request);
 
                         byte[] filebytes = System.IO.File.ReadAllBytes(deserialisedPath);
                         var file = Path.GetFileName(path);
@@ -127,9 +128,9 @@ namespace AECI.ICM.Api.Controllers
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                return BadRequest(ex.Message);
             }
         }
 
@@ -184,6 +185,9 @@ namespace AECI.ICM.Api.Controllers
 
         private string BuildSignaturePath(ResponseViewModel args)
         {
+            if (!_baseReportPath.EndsWith(@"\"))
+                _baseReportPath = $"{_baseReportPath}\\";
+
             var sigPath = _baseReportPath;
 
             if(!sigPath.EndsWith(@"\"))

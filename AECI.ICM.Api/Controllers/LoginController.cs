@@ -126,10 +126,11 @@ namespace AECI.ICM.Api.Controllers
         {
             try
             {
+                //todo:
                 if (_debug == SystemStatusEnum.Debug)
                     throw new AuthException(@"ma\majobs", "AD connection could not be established");
 
-                    var domPassword = "6a13tatqd9XRFkNUOFsC55GUrmiAjKelHokNDS2nW4u7Ipf2sswbUYDLMVXmkOq";
+                var domPassword = "6a13tatqd9XRFkNUOFsC55GUrmiAjKelHokNDS2nW4u7Ipf2sswbUYDLMVXmkOq";
                     var domain = "192.168.210.45";
                     var user = new Login.V1.Login();
 

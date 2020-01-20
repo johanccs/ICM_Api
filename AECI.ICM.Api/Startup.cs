@@ -22,6 +22,17 @@ namespace AECI.ICM.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
+
+            //services.AddCors(options =>
+            //{
+            //    options.AddPolicy("CorsPolicy",
+            //        builder => builder.WithOrigins("http://localhost:8095")
+            //        .AllowAnyMethod()
+            //        .AllowAnyHeader()
+            //        .SetIsOriginAllowed((host)=>true)
+            //        .AllowCredentials());
+            //});
 
             services.AddAutoMapper(typeof(Startup));
             services.RegisterServices(Configuration);
@@ -40,9 +51,9 @@ namespace AECI.ICM.Api
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.UseCors("Cors");
-            
+            //app.UseCors("CorsPolicy");
             app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
             app.UseMvc();
         }
     }

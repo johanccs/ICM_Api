@@ -39,7 +39,7 @@ namespace AECI.ICM.IoC
         public static void ConfigureServices(this IServiceCollection services)
         {
             
-            services.AddCors();
+            //services.AddCors();
 
             //services.AddCors(options =>
             //{

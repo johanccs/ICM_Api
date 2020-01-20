@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AECI.ICM.Application.Commands
+﻿namespace AECI.ICM.Application.Commands
 {
     public static class ICM
     {

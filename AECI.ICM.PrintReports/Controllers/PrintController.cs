@@ -7,9 +7,11 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace AECI.ICM.PrintReports.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class PrintController : ApiController
     {   
         public HttpResponseMessage PrintReport(ResponseViewModel param)

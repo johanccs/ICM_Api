@@ -3,7 +3,9 @@ using AECI.ICM.Application.Interfaces;
 using AECI.ICM.Domain.Entities;
 using AECI.ICM.Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
+using System.IO;
 
 namespace AECI.ICM.Api.Controllers
 {
@@ -14,14 +16,16 @@ namespace AECI.ICM.Api.Controllers
         #region Readonly Fields
 
         private readonly ISettingsService _settingsCtx;
+        private readonly IConfiguration _config;
 
         #endregion
 
         #region Constructor
 
-        public SettingController(ISettingsService settingsCtx)
+        public SettingController(ISettingsService settingsCtx, IConfiguration config)
         {
             _settingsCtx = settingsCtx;
+            _config = config;
         }
 
         #endregion
@@ -38,11 +42,14 @@ namespace AECI.ICM.Api.Controllers
                 if (result == null)
                     return NotFound(result);
 
+                Log("Inside setting");
+
                 return Ok(Map(result));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Log($"Error: {ex.Message} : Stacktrace: {ex.StackTrace}");
+                return BadRequest(ex.Message);
             }
         }
 
@@ -62,7 +69,6 @@ namespace AECI.ICM.Api.Controllers
         #endregion
 
         #region Private Methods
-
         private SettingsViewModel Map(SettingEntity unmapped)
         {
             var mapped = new SettingsViewModel();
@@ -87,6 +93,27 @@ namespace AECI.ICM.Api.Controllers
             mapped.WarningEmail = unmapped.WarningEmail;
 
             return mapped;
+        }
+
+        private bool Log(string message)
+        {
+            var folder = _config[Constants.ApiConstants.BASEREPORTFOLDER];
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
+            if(!folder.EndsWith("\\"))
+            {
+                folder = $"{folder}\\Exceptions";
+            }
+
+            folder = $"{folder}\\log.txt";
+
+            using (var sb = new StreamWriter(folder, true))
+            {
+                sb.WriteLine(message);
+            }
+
+            return true;
         }
 
         #endregion
