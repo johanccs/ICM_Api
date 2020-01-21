@@ -17,7 +17,7 @@ namespace AECI.ICM.PrintReports.Controllers
         public HttpResponseMessage PrintReport(ResponseViewModel param)
         {
             var imgPath = @"C:\TestReports\MuchLogo.png";
-            var ext = ".pdf";
+            var ext = "pdf";
 
             var filePath = CreateFilePath(param, @"C:\TestReports\");
 
