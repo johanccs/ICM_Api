@@ -62,7 +62,7 @@ namespace AECI.ICM.PrintReports.Controllers
             report.picFinSig.Image = Image.FromFile(param.FinSigPath);
 
             report.picBMSig.SizeMode = GrapeCity.ActiveReports.SectionReportModel.SizeModes.Zoom;
-            report.picFinSig.SizeMode = GrapeCity.ActiveReports.SectionReportModel.SizeModes.Zoom;
+            report.picFinSig.SizeMode = GrapeCity.ActiveReports.SectionReportModel.SizeModes.Clip;
 
             report.picBMSig.PictureAlignment = GrapeCity.ActiveReports.SectionReportModel.PictureAlignment.TopLeft;
             report.picFinSig.PictureAlignment = GrapeCity.ActiveReports.SectionReportModel.PictureAlignment.TopLeft;
