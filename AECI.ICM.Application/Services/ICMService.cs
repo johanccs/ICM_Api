@@ -1,4 +1,5 @@
-﻿using AECI.ICM.Domain.Entities;
+﻿using AECI.ICM.Data.DataExceptions;
+using AECI.ICM.Domain.Entities;
 using AECI.ICM.Domain.Interfaces;
 using AECI.ICM.Shared.ViewModels;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace AECI.ICM.Application.Services
             try
             {
                 _icmRepository.Add(Map(entity));
-            }
+            }            
             catch (System.Exception)
             {
                 throw;

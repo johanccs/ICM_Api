@@ -1,5 +1,6 @@
 ﻿using AECI.ICM.Data.AutoMapper;
 using AECI.ICM.Data.Context;
+using AECI.ICM.Data.DataExceptions;
 using AECI.ICM.Data.Entities;
 using AECI.ICM.Domain.Entities;
 using AECI.ICM.Domain.Interfaces;
@@ -54,8 +55,8 @@ namespace AECI.ICM.Data.Repository
                                                                 p.Branch == entity.Branch);
 
                 if (currentResult != null)
-                    throw new Exception($"A duplicate record was found for {entity.Branch}", 
-                          new Exception("Duplicate entry found."));
+                    throw new DuplicateEntityException(nameof(ResultEntity), 
+                        $"A duplicate record was found for {entity.Branch}");
 
                 _ctx.Results.Add(result);
 

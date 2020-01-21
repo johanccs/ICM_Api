@@ -17,9 +17,18 @@ namespace AECI.ICM.PrintReports.Controllers
         public HttpResponseMessage PrintReport(ResponseViewModel param)
         {
             var imgPath = @"C:\TestReports\MuchLogo.png";
+            var ext = ".pdf";
+
             var filePath = CreateFilePath(param, @"C:\TestReports\");
+
             var fileName = CreateFileName(param);
-            var ext = "pdf";
+
+            if(fileName == null)
+            {
+                return Request.CreateErrorResponse(
+                    HttpStatusCode.NotFound, fileName);
+            }
+           
             var fullPath = Path.Combine(filePath, fileName);
             fullPath = $"{fullPath}.{ext}";
 
@@ -62,7 +71,7 @@ namespace AECI.ICM.PrintReports.Controllers
             report.picFinSig.Image = Image.FromFile(param.FinSigPath);
 
             report.picBMSig.SizeMode = GrapeCity.ActiveReports.SectionReportModel.SizeModes.Zoom;
-            report.picFinSig.SizeMode = GrapeCity.ActiveReports.SectionReportModel.SizeModes.Zoom;
+            report.picFinSig.SizeMode = GrapeCity.ActiveReports.SectionReportModel.SizeModes.Clip;
 
             report.picBMSig.PictureAlignment = GrapeCity.ActiveReports.SectionReportModel.PictureAlignment.TopLeft;
             report.picFinSig.PictureAlignment = GrapeCity.ActiveReports.SectionReportModel.PictureAlignment.TopLeft;

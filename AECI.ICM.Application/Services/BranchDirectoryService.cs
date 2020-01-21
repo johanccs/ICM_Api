@@ -90,7 +90,7 @@ namespace AECI.ICM.Application.Services
             branchDir.Add(new Branch { SiteId = 51, AbbrevName = "COED", Fullname = "Coedmore" });
             branchDir.Add(new Branch { SiteId = 42, AbbrevName = "EIK", Fullname = "Eikenhof" });
             branchDir.Add(new Branch { SiteId = 43, AbbrevName = "RDP", Fullname = "Roodepoort" });
-            branchDir.Add(new Branch { SiteId = 82, AbbrevName = "ECA", Fullname = "Eastern Cape" });
+            branchDir.Add(new Branch { SiteId = 82, AbbrevName = "ECA", Fullname = "East London"});
             branchDir.Add(new Branch { SiteId = 84, AbbrevName = "UMT", Fullname = "Mthatha" });
             branchDir.Add(new Branch { SiteId = 58, AbbrevName = "PMB", Fullname = "Pietermaritzburg" });
             branchDir.Add(new Branch { SiteId = 01, AbbrevName = "HO", Fullname = "Head Office" });

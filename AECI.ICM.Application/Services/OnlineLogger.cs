@@ -50,7 +50,6 @@ namespace AECI.ICM.Application.Services
             {
                throw ex;
             }
-            
         }
         #endregion
     }

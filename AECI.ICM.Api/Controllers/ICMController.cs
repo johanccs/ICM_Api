@@ -1,5 +1,6 @@
 ﻿using AECI.ICM.Api.Constants;
 using AECI.ICM.Application.Interfaces;
+using AECI.ICM.Data.DataExceptions;
 using AECI.ICM.Domain.Interfaces;
 using AECI.ICM.Shared.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -74,13 +75,27 @@ namespace AECI.ICM.Api.Controllers
         }
 
         [HttpPost]       
-        public async Task<ActionResult> Post(ResponseViewModel request)
+        public async Task<IActionResult> Post(ResponseViewModel request)
         {
             HttpResponseMessage response = null;
             request.BMSigPath = BuildSignaturePath(request);
+
+            if (!ValidateFilePath(request.BMSigPath))
+            {
+                return StatusCode(404, $"{request.BMSigPath} could not be found");
+            }
+
             request.FinSigPath = BuildFinSigPath();
 
-            _icmService.Add(request);
+            try
+            {
+                _icmService.Add(request);
+            }
+            catch (Exception ex)
+            {
+                if (ex is DuplicateEntityException)
+                    return StatusCode(500, ex.Message);
+            }
 
             try
             {
@@ -182,6 +197,16 @@ namespace AECI.ICM.Api.Controllers
         #endregion
 
         #region Private Methods
+
+        private bool ValidateFilePath(string file)
+        {
+            var testFile = Path.GetFileName(file);
+
+            if (testFile.ToLower() == "nosig.png".ToLower())
+                return false;
+
+            return System.IO.File.Exists(file);
+        }
 
         private string BuildSignaturePath(ResponseViewModel args)
         {
