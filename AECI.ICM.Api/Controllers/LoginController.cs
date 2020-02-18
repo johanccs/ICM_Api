@@ -48,11 +48,11 @@ namespace AECI.ICM.Api.Controllers
         {
             try
             {
-                //////if (_debug == SystemStatusEnum.Prod)
-                //////{
-                //////    if (!Authenticate(request))
-                //////        return Unauthorized("Invalid username or password");
-                //////}
+                if (_debug == SystemStatusEnum.Prod)
+                {
+                    if (!Authenticate(request))
+                        return Unauthorized("Invalid username or password");
+                }
                 var loggedUser = QueryADUser(request.Username);
                 loggedUser = SetSiteAbbreviation(loggedUser);
                
@@ -127,8 +127,8 @@ namespace AECI.ICM.Api.Controllers
             try
             {
                 //todo:
-                ////if (_debug == SystemStatusEnum.Debug)
-                ////    throw new AuthException(@"ma\majobs", "AD connection could not be established");
+                if (_debug == SystemStatusEnum.Debug)
+                    throw new AuthException(@"ma\majobs", "AD connection could not be established");
 
                 var domPassword = "6a13tatqd9XRFkNUOFsC55GUrmiAjKelHokNDS2nW4u7Ipf2sswbUYDLMVXmkOq";
                     var domain = "192.168.210.45";

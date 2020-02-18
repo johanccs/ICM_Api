@@ -5,6 +5,7 @@ using MonitorService.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Mail;
 using System.Text;
@@ -33,12 +34,11 @@ namespace MonitorService.Services
         {
             _dbContext = new MonDbContext();
             _notificationService = new SharedEmailNotificationService();
-            _notificationService.Body = "test";
-            _notificationService.CC = "johan.ccs@gmail.com";
+            _notificationService.Body = "";
             _notificationService.FromEmail = "muchasphalt@muchasphalt.com";
-            _notificationService.Server = "muchserver";
-            _notificationService.Subject = "test";
-            _notificationService.ToEmail = "johan.potgieter@muchasphalt.com";
+            _notificationService.Server = "muchsmtp";
+            _notificationService.Subject = "ICM Report";
+            _notificationService.ToEmail = "";
         }
 
         #endregion
@@ -47,8 +47,11 @@ namespace MonitorService.Services
 
         public void Start()
         {
+            //Debugger.Break();
             _currSetting = GetSetting();
             var cuttOffDay = _currSetting.WarningCuttOffDate.Day;
+            var builder = new StringBuilder();
+            var accountant = GetUserFromEmail(_currSetting.WarningEmail);
 
             if(DateTime.Now.Day > cuttOffDay)
             {
@@ -56,9 +59,15 @@ namespace MonitorService.Services
                 var mailMessages = new List<MailMessage>();
 
                 foreach (var exception in exceptions)
-                {
-                    mailMessages.Add(BuildMessage(exception, _currSetting.WarningEmail));
+                {                    
+                    builder.AppendLine($"Outstanding site: {exception.Site} - month: {exception.Month}");
                 }
+
+                mailMessages.Add(BuildMessage(
+                    builder.ToString(), 
+                    _currSetting.WarningEmail, 
+                    accountant
+                ));
 
                 _notificationService.Send(mailMessages);               
             }
@@ -68,6 +77,19 @@ namespace MonitorService.Services
 
         #region Private Methods
 
+        private string GetUserFromEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                throw new ArgumentNullException(nameof(email));
+
+            string[] values = email.Split('.');
+            string name = values[0].ToString();
+            string firstChar = name.Substring(0, 1).ToUpper();
+            string restOfName = name.Substring(1);
+            string fullName = $"{firstChar}{restOfName}";
+
+            return fullName;
+        }
         private List<ResultException> CheckOutstandingSites()
         {
             try
@@ -135,6 +157,7 @@ namespace MonitorService.Services
             sites.Add(53, "PMB");
             sites.Add(82, "ECA");
             sites.Add(84, "UMT");
+            sites.Add(01, "HO");
 
             return sites;
         }
@@ -147,6 +170,33 @@ namespace MonitorService.Services
             sb.AppendLine($"Month - {ex.Month}");
 
             return sb.ToString();
+        }
+
+        private string BuildBody(string sites, string accountant)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"Hi {accountant}");
+            sb.AppendLine();
+            sb.AppendLine($"Please note that the ICM has not been completed for {DateTime.Now.ToShortDateString()}");
+            sb.AppendLine($"Outstanding sites:");
+            sb.AppendLine($"{sites}");
+
+            sb.AppendLine();
+            sb.AppendLine("Regards");
+            sb.AppendLine("ICM Monitor Service");
+
+            return sb.ToString();
+        }
+
+        private MailMessage BuildMessage(string body, string toAddress, string accountant)
+        {
+            var message = new MailMessage(muchEmail, toAddress);
+
+            message.Subject = "AECI ICM Exception List";
+            
+            message.Body = BuildBody(body, accountant);
+
+            return message;
         }
 
         private MailMessage BuildMessage(ResultException exception, string cc)

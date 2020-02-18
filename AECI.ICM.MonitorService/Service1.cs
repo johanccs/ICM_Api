@@ -11,6 +11,7 @@ namespace MonitorService
         #region Readonly Fields
 
         private IExceptionMonitor _exceptionMonitor = new ExceptionMonitor();
+        private EventLog eventlog;
 
         #endregion
 
@@ -26,19 +27,18 @@ namespace MonitorService
         {
             InitializeComponent();
 
-            Debugger.Launch();
-           
-            //eventlog = new EventLog();
-            //if (!EventLog.SourceExists("ICMMonitorService"))
-            //{
-            //    EventLog.CreateEventSource(
-            //        "ICMMonitorService", "ICMMonitorService"
-            //    );
-            //}
+            //Debugger.Launch();
 
-            //eventlog.Source = "ICMMonitorService";
-            //eventlog.Log = "ICMMonitorService";
+            eventlog = new EventLog();
+            if (!EventLog.SourceExists("ICMMonitorService"))
+            {
+                EventLog.CreateEventSource(
+                    "ICMMonitorService", "ICMMonitorService"
+                );
+            }
 
+            eventlog.Source = "ICMMonitorService";
+            eventlog.Log = "ICMMonitorService";
         }
 
         #endregion
@@ -47,27 +47,30 @@ namespace MonitorService
 
         protected override void OnStart(string[] args)
         {
-            //eventlog.WriteEntry("Service Start");
+            eventlog.WriteEntry("Service Starting");
 
-            Debugger.Break();
+            //Debugger.Break();
 
             _exceptionMonitor.Start();
 
+            //timer.Interval = 86400000;
             timer.Interval = 600000;
             timer.Elapsed += new ElapsedEventHandler(OnTimer);
             timer.Start();
+
+            eventlog.WriteEntry("Service Started");
         }
 
         private void OnTimer(object sender, ElapsedEventArgs e)
         {
             //Debugger.Break();
-
+            eventlog.WriteEntry("Timer fired");
             _exceptionMonitor.Start();
         }
 
         protected override void OnStop()
         {
-            //eventlog.WriteEntry("Service Stop");
+            eventlog.WriteEntry("Service Stop");
             timer.Stop();
         }
 

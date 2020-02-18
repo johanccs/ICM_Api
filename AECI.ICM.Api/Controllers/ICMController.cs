@@ -200,6 +200,9 @@ namespace AECI.ICM.Api.Controllers
 
         private bool ValidateFilePath(string file)
         {
+            if (string.IsNullOrEmpty(file))
+                return false;
+
             var testFile = Path.GetFileName(file);
 
             if (testFile.ToLower() == "nosig.png".ToLower())
@@ -281,8 +284,8 @@ namespace AECI.ICM.Api.Controllers
 
             if (System.IO.File.Exists(sigPath))
                 return sigPath;
-
-            return _baseReportPath += "NoSig.png";
+            else
+                return null;
         }
 
         private string BuildFinSigPath()
