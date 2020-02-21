@@ -15,6 +15,7 @@ namespace AECI.ICM.Application.Commands
                 public string To { get; set; }
                 public string Subject { get; set; }
                 public string Branch { get; set; }
+                public string Attachments { get; set; }
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using AECI.ICM.Application.Interfaces;
+﻿using AECI.ICM.Application.Commands;
+using AECI.ICM.Application.Interfaces;
 using AECI.ICM.Application.Models;
 using AECI.ICM.Application.Services;
 using AECI.ICM.Data.Context;
@@ -29,6 +30,7 @@ namespace AECI.ICM.IoC
             services.AddScoped<IBranch, Branch>();
             services.AddScoped<ICMFileService, ICMFileService>();
             services.AddScoped<ILogger, OnlineLogger>();
+            services.AddSingleton<IFileSystem, Application.Services.FileSystemService>();
           
             services.AddDbContext<ICMDbContext>(options =>
             {

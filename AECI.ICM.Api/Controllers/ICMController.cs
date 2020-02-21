@@ -185,7 +185,7 @@ namespace AECI.ICM.Api.Controllers
         [Route("getPdf")]
         public FileResult GetPdf(Application.Commands.ICM.V1.Reprint request)
         {
-            var folder = "D:\\TestReports\\";
+            var folder = _baseReportPath;
             var file = Path.Combine(folder,request.Branch,request.FileName);
 
             byte[] filebytes = System.IO.File.ReadAllBytes(file);

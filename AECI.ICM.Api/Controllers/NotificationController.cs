@@ -51,6 +51,33 @@ namespace AECI.ICM.Api.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("resendReport")]
+        public bool ResendReport(Notification.V1.CreateEmail request)
+        {
+            try
+            {
+                var setting = _settingsService.GetAllAsync();
+                var mailTo = request.To;
+                var smtp = _config[ApiConstants.SMTPServer];
+
+                _notificationService.Body = request.Message;
+                _notificationService.From = setting.WarningEmail;
+                _notificationService.Server = smtp;
+                _notificationService.Subject = request.Subject;
+                _notificationService.To = mailTo;
+                _notificationService.AttachmentPath = request.Attachments;
+
+                _notificationService.Send();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         #endregion
 
         #region Private Methods

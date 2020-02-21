@@ -1,7 +1,9 @@
-﻿namespace MonitorService.Interfaces
+﻿using System.Diagnostics;
+
+namespace MonitorService.Interfaces
 {
     public interface IExceptionMonitor
     {
-        void Start();
+        void Start(EventLog eventLog);
     }
 }

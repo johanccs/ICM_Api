@@ -57,10 +57,11 @@ namespace AECI.ICM.Api.Controllers
         {
             var setting = GetSetting();
             var cutOffDay = setting.WarningCuttOffDate.Day;
+            var monthNo = DateTime.Now.Month;
 
             if (DateTime.Now.Day > cutOffDay)
             {
-                var exceptions = GetExceptions(setting);
+                var exceptions = GetExceptions(setting, monthNo);
 
                 return Ok(exceptions);
             }
@@ -70,14 +71,14 @@ namespace AECI.ICM.Api.Controllers
 
         [HttpGet]
         [Route("getByMonthNo/{num}")]
-        public IActionResult GetByMonthNo(string num)
+        public IActionResult GetByMonthNo(int num)
         {
             var setting = GetSetting();
             var cutOffDay = setting.WarningCuttOffDate.Day;
 
             if (DateTime.Now.Day > cutOffDay)
             {
-                var exceptions = GetExceptions(setting).Where(p=>p.Month == num);
+                var exceptions = GetExceptions(setting,num);
 
                 return Ok(exceptions);
             }
@@ -103,22 +104,24 @@ namespace AECI.ICM.Api.Controllers
             return true;
         }
 
-        private List<ResultEntity> GetExceptions(SettingEntity setting)
+        private List<ResultEntity> GetExceptions(SettingEntity setting, int monthNo)
         {
-            var monthNo = DateTime.Now.Month;
             var results = GetResults(monthNo.ToString());
             var exceptions = new List<ResultEntity>();
             var allBranches = _branchDirectoryService.GetAll();
 
             foreach (var branch in allBranches)
             {
-                var result = results.FirstOrDefault(p => p.Branch == branch.AbbrevName);
-                if (result == null)
+                var result = results.Any(p => p.Branch == branch.AbbrevName);
+                if (!result)
                 {
                     var settingEmail = setting.Emails.FirstOrDefault(p => 
                                     p.Site.ToLower() == branch.AbbrevName.ToLower());
-                    var exception = new ResultEntity { BMName = settingEmail.BranchManagerName, Branch = branch.AbbrevName, 
-                                                       FinName = settingEmail.RegionalAccountantName, Month = monthNo.ToString() };
+                    var exception = new ResultEntity 
+                    { 
+                      BMName = settingEmail.BranchManagerName, Branch = branch.AbbrevName, 
+                      FinName = settingEmail.RegionalAccountantName, Month = monthNo.ToString()
+                    };
 
                     exceptions.Add(exception);
                 }

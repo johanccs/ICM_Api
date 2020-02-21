@@ -1,5 +1,7 @@
 ﻿using MonitorService.Interfaces;
 using MonitorService.Services;
+using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.ServiceProcess;
 using System.Timers;
@@ -51,10 +53,13 @@ namespace MonitorService
 
             //Debugger.Break();
 
-            _exceptionMonitor.Start();
+            _exceptionMonitor.Start(eventlog);
 
-            //timer.Interval = 86400000;
-            timer.Interval = 600000;
+            int timerInterval = Convert.ToInt32(
+                ConfigurationManager.AppSettings.
+                Get(MappingConfiguration.MappingConfig.DEBUGTIMERVALUE));
+            
+            timer.Interval = timerInterval;
             timer.Elapsed += new ElapsedEventHandler(OnTimer);
             timer.Start();
 
@@ -63,15 +68,15 @@ namespace MonitorService
 
         private void OnTimer(object sender, ElapsedEventArgs e)
         {
-            //Debugger.Break();
             eventlog.WriteEntry("Timer fired");
-            _exceptionMonitor.Start();
+            _exceptionMonitor.Start(eventlog);
         }
 
         protected override void OnStop()
         {
             eventlog.WriteEntry("Service Stop");
             timer.Stop();
+            timer.Dispose();
         }
 
         #endregion

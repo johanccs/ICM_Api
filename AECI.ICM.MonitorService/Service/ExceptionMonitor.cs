@@ -18,8 +18,10 @@ namespace MonitorService.Services
 
         private MonDbContext _dbContext;
         private Setting _currSetting;
-        private string muchEmail = "muchreply@muchasphalt.com";       
-      
+        private string muchEmail = "muchreply@muchasphalt.com";
+        private string _currMonth = string.Empty;
+        private EventLog _eventLog;
+
         #endregion
 
         #region Readonly Fields
@@ -45,37 +47,119 @@ namespace MonitorService.Services
 
         #region Public Methods
 
-        public void Start()
+        public void Start(EventLog eventLog)
         {
-            //Debugger.Break();
-            _currSetting = GetSetting();
-            var cuttOffDay = _currSetting.WarningCuttOffDate.Day;
-            var builder = new StringBuilder();
-            var accountant = GetUserFromEmail(_currSetting.WarningEmail);
-
-            if(DateTime.Now.Day > cuttOffDay)
+            try
             {
-                var exceptions = CheckOutstandingSites();
-                var mailMessages = new List<MailMessage>();
+                _eventLog = eventLog;
+                _currSetting = GetSetting();
+                var cuttOffDay = _currSetting.WarningCuttOffDate.Day;
+                
+                if (DateTime.Now.Day > cuttOffDay)
+                {
+                    var outstandingSites = CheckOutstandingSites();
+                    if (SendNotificationToAccountant(outstandingSites))
+                        SendNotificationToBranchManagers(outstandingSites);
 
-                foreach (var exception in exceptions)
-                {                    
-                    builder.AppendLine($"Outstanding site: {exception.Site} - month: {exception.Month}");
+                    WriteLogToEventViewer(
+                        "Start method completed. See Log entries for individual messages",
+                        "Exception Monitor Start");
                 }
-
-                mailMessages.Add(BuildMessage(
-                    builder.ToString(), 
-                    _currSetting.WarningEmail, 
-                    accountant
-                ));
-
-                _notificationService.Send(mailMessages);               
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
         #endregion
 
         #region Private Methods
+
+        private void WriteLogToEventViewer(Exception ex, String source)
+        {
+            var errBuilder = new StringBuilder();
+
+            errBuilder.AppendLine($"An error occurred in: {source}");
+            errBuilder.AppendLine($"Message: {ex.Message}");
+            errBuilder.AppendLine($"Stacktrace: {ex.StackTrace}");
+            errBuilder.AppendLine($"Date: {DateTime.Now}");
+
+            _eventLog.WriteEntry(errBuilder.ToString(), EventLogEntryType.Error);
+        }
+
+        private void WriteLogToEventViewer(string message, String source)
+        {
+            var msgBuilder = new StringBuilder();
+
+            msgBuilder.AppendLine($"Task is completed in source: {source}");
+            msgBuilder.AppendLine($"Message: {message}");
+            msgBuilder.AppendLine($"Date: {DateTime.Now}");
+
+            _eventLog.WriteEntry(msgBuilder.ToString(), EventLogEntryType.SuccessAudit);
+        }
+
+        private bool SendNotificationToBranchManagers(List<ResultException>outstandingSites)
+        {
+            _eventLog.WriteEntry("Sending emails to BranchManagers");
+            var mailMessages = new List<MailMessage>();
+
+            try
+            {
+                foreach (var site in outstandingSites)
+                {
+                    mailMessages.Add(BuildMessage(site, _currSetting));
+                }
+
+                _notificationService.Send(mailMessages);
+
+                WriteLogToEventViewer(
+                    "Email sent successfully",
+                    "SendNotificationToBranchManagers");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                WriteLogToEventViewer(ex, "SendNotificationToBranchManagers");
+                throw;                
+            }
+        }
+
+        private bool SendNotificationToAccountant(List<ResultException>outstandingSites)
+        {
+            var accountant = GetUserFromEmail(_currSetting.WarningEmail);
+            var builder = new StringBuilder();
+            var mailMessages = new List<MailMessage>();
+
+            try
+            {
+                foreach (var outstandingSite in outstandingSites)
+                {
+                    builder.AppendLine(
+                        $"Outstanding site: {outstandingSite.Site} - month: {GetMonthName(_currMonth)}");
+                }
+
+                mailMessages.Add(BuildMessage(
+                    builder.ToString(),
+                    _currSetting.WarningEmail,
+                    accountant
+                ));
+
+                _notificationService.Send(mailMessages);
+
+                WriteLogToEventViewer(
+                    "Email sent successfully", 
+                    "SendNotificationToBranchManagers");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                WriteLogToEventViewer(ex, "SendNotificationToBranchManagers");
+                throw;
+            }
+        }
 
         private string GetUserFromEmail(string email)
         {
@@ -90,6 +174,7 @@ namespace MonitorService.Services
 
             return fullName;
         }
+        
         private List<ResultException> CheckOutstandingSites()
         {
             try
@@ -100,9 +185,9 @@ namespace MonitorService.Services
 
                 foreach(KeyValuePair<int,string>site in sites)
                 {
-                    var ret = results.FirstOrDefault(p => p.Branch == site.Value);
+                    var ret = results.Any(p => p.Branch.ToLower() == site.Value.ToLower());
 
-                    if (ret == null)
+                    if (!ret)
                         exceptionSites.Add(new ResultException {
                             Date = DateTime.Now,
                             Month = Convert.ToInt16(
@@ -128,8 +213,9 @@ namespace MonitorService.Services
 
         private List<Result> GetICMResults()
         {
-            var currMonth = DateTime.Now.Month.ToString();
-            var currResults = _dbContext.Results.Where(p => p.Month == currMonth).ToList();
+            var currDate = DateTime.Now.AddMonths(-1);
+            _currMonth = currDate.Month.ToString();
+            var currResults = _dbContext.Results.Where(p => p.Month == _currMonth).ToList();
             if (currResults == null)
                 return new List<Result>();
 
@@ -177,7 +263,8 @@ namespace MonitorService.Services
             var sb = new StringBuilder();
             sb.AppendLine($"Hi {accountant}");
             sb.AppendLine();
-            sb.AppendLine($"Please note that the ICM has not been completed for {DateTime.Now.ToShortDateString()}");
+            sb.AppendLine($"Please note that the ICM has not been completed for " +
+                $"{ConvertToShortDate(DateTime.Now.AddMonths(-1))}");
             sb.AppendLine($"Outstanding sites:");
             sb.AppendLine($"{sites}");
 
@@ -186,6 +273,20 @@ namespace MonitorService.Services
             sb.AppendLine("ICM Monitor Service");
 
             return sb.ToString();
+        }
+
+        private string BuildBody(string bmName)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine($"Hi {bmName}");
+            builder.AppendLine($"Please note that ICM submission for {GetMonthName(_currMonth)} is overdue");
+            builder.AppendLine("Please ensure that it is completed before the close of day");
+            builder.AppendLine();
+            builder.AppendLine();
+            builder.AppendLine("Regards");
+            builder.AppendLine("Much Asphalt");
+
+            return builder.ToString();
         }
 
         private MailMessage BuildMessage(string body, string toAddress, string accountant)
@@ -214,6 +315,50 @@ namespace MonitorService.Services
             return message;
         }
 
+        private MailMessage BuildMessage(ResultException site, 
+                                         Setting currSetting)
+        {
+            string mailTo = currSetting.
+                   Emails.FirstOrDefault(p => p.Site.ToLower() ==
+                   site.Site.ToLower()).BranchManagerEmail;
+
+            var recipientName = currSetting.
+                                Emails.FirstOrDefault(p=>p.Site.ToLower() == 
+                                site.Site.ToLower()).BranchManagerName;
+
+            var message = new MailMessage(muchEmail, mailTo);
+            message.Subject = "Overdue ICM submission";
+            message.Body = BuildBody(recipientName);
+
+            return message;
+        }
+
         #endregion
+
+        #region Util Methods
+
+        private string ConvertToShortDate(DateTime date)
+        {
+            var month = date.Month;
+
+            var convertedDate = GetMonthName(month.ToString());
+
+            return convertedDate;
+        }
+
+        private string GetMonthName(string month)
+        {
+            System.Globalization.DateTimeFormatInfo mfi = 
+                new System.Globalization.DateTimeFormatInfo();
+
+            string monthName = mfi.GetMonthName(Convert.ToInt32(month));
+            string year = DateTime.Now.Year.ToString();
+
+            return $"{monthName} {year}";
+        }
+
+        #endregion
+
+
     }
 }

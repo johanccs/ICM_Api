@@ -1,5 +1,4 @@
 ﻿using AECI.ICM.Domain.Entities;
-using System.Threading.Tasks;
 
 namespace AECI.ICM.Application.Interfaces
 {

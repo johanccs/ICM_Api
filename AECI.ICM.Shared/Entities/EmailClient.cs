@@ -60,7 +60,18 @@ namespace AECI.ICM.Shared.Entities
                     message.CC.Add(cc);
 
                 if (!string.IsNullOrEmpty(attachmentPath))
-                    message.Attachments.Add(new Attachment(attachmentPath));
+                {
+                    if(attachmentPath.Contains(";"))
+                    {
+                        var attachments = FormatAttachments(attachmentPath);
+
+                        foreach (var attach in attachments)
+                            if(attach.Contains("pdf"))
+                                message.Attachments.Add(new Attachment(attach));
+                    }
+                    else
+                        message.Attachments.Add(new Attachment(attachmentPath));
+                }
 
                 SmtpClient client = new SmtpClient(server);
                 client.UseDefaultCredentials = true;
@@ -78,11 +89,12 @@ namespace AECI.ICM.Shared.Entities
             message = null;
         }
 
-        #endregion
+        private static string[] FormatAttachments(string attachments)
+        {
+            var values = attachments.Split(';');
 
-        #region Private Methods
-
-
+            return values;
+        }
 
         #endregion
     }
