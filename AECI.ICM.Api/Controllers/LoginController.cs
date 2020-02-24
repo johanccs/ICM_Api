@@ -4,7 +4,8 @@ using AECI.ICM.Application.ApplicationEnums;
 using AECI.ICM.Application.ApplicationExceptions;
 using AECI.ICM.Application.Commands;
 using AECI.ICM.Application.Interfaces;
-using AECI.ICM.Application.Models.MessageTypes;
+using AECI.ICM.Shared.Interfaces;
+using AECI.ICM.Shared.ViewModels.MessageTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -32,9 +33,9 @@ namespace AECI.ICM.Api.Controllers
                                ILogger logger,
                                IConfiguration config)
         {
-            _branchDirectoryService = branchDirectory;
-            _logger = logger;
+            _branchDirectoryService = branchDirectory;            
             _config = config;
+            _logger = logger;
 
             _debug = (SystemStatusEnum)Enum.Parse(typeof(SystemStatusEnum), 
                     _config[ApiConstants.SYSTEMSTATUS]);
@@ -61,12 +62,13 @@ namespace AECI.ICM.Api.Controllers
 
                 loggedUser = SetRoles(loggedUser);
 
-                LogToOnlineApi(request, "User has logged on at");
+                LogToEventLog(request.Username, $"{loggedUser.ADUser} logged in @ {DateTime.Now}");
 
                 return Ok(loggedUser);
             }
             catch (Exception ex)
             {
+                LogToEventLog(request.Username, $"{ex.Message}: @ {DateTime.Now}", "Error");
                 return BadRequest(ex.Message);
             }
         }
@@ -88,6 +90,22 @@ namespace AECI.ICM.Api.Controllers
         }
 
         #region Private Methods
+
+        private void LogToEventLog(string user, string message, string cat = "Info")
+        {
+            _logger.LogAsync(new EventLogMessage()
+            {
+                Application = "ICM SPA",
+                Category = cat,
+                Comment = "None",
+                Date = DateTime.Now,
+                Id = 1,
+                Importance = "High",
+                Message = message,
+                Stacktrace = null,
+                User = user
+            });
+        }
 
         private void LogToOnlineApi(Login.V1.Login request, string message)
         {
@@ -150,7 +168,6 @@ namespace AECI.ICM.Api.Controllers
                                 user.Email = sr.Properties["mail"][0].ToString();
                                 user.Username = sr.Properties["samaccountname"][0].ToString();
                                 user.DisplayName = sr.Properties["displayname"][0].ToString();
-
                                 user.SystemStatus = _debug.ToString();
 
                             if (sr.Properties["office"].Count > 0)
@@ -171,7 +188,7 @@ namespace AECI.ICM.Api.Controllers
                     Email = "johan.ccs@gmail.com",
                     Site = "Head Office",
                     Username = "mrma86423",
-                    SystemStatus = SystemStatusEnum.Debug.ToString()
+                    SystemStatus = SystemStatusEnum.Debug.ToString(),
                 };
 
                 return exception;

@@ -3,7 +3,7 @@ using AECI.ICM.Shared.ViewModels.MessageTypes;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace AECI.ICM.Application.Services
+namespace AECI.ICM.Shared.Service
 {
     public class EventLogger : ILogger
     {
@@ -24,6 +24,7 @@ namespace AECI.ICM.Application.Services
                     "ICMMonitorService", "ICMMonitorService"
                 );
             }
+
             _eventlog.Source = "ICMMonitorService";
             _eventlog.Log = "ICMMonitorService";
         }
@@ -31,9 +32,9 @@ namespace AECI.ICM.Application.Services
         #endregion
 
         public async Task<bool> LogAsync(
-            ILogMessageType message, string src = "API", string url="")
+            ILogMessageType message, string _src = "API", string url="")
         {
-            _eventlog.Source = src;
+            _eventlog.Source = _src;
 
             if (message.GetType() == typeof(EventLogMessage))
               return await Task.Run(() => {

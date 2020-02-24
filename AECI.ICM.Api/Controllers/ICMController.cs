@@ -2,7 +2,9 @@
 using AECI.ICM.Application.Interfaces;
 using AECI.ICM.Data.DataExceptions;
 using AECI.ICM.Domain.Interfaces;
+using AECI.ICM.Shared.Interfaces;
 using AECI.ICM.Shared.ViewModels;
+using AECI.ICM.Shared.ViewModels.MessageTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -25,6 +27,7 @@ namespace AECI.ICM.Api.Controllers
         private readonly INotificationService _notificationService;
         private readonly ISettingsService _settingsService;
         private readonly IConfiguration _config;
+        private readonly ILogger _logger;
         private readonly string _systemStatus;
         private readonly string _smtp;
        
@@ -41,11 +44,13 @@ namespace AECI.ICM.Api.Controllers
         public ICMController(IICMService icmService, 
                              INotificationService notificationService,
                              IConfiguration config,
+                             ILogger logger,
                              ISettingsService settingsService)
         {
             _icmService = icmService;
             _notificationService = notificationService;
             _config = config;
+            _logger = logger;
             _settingsService = settingsService;
             _systemStatus = _config[ApiConstants.SYSTEMSTATUS];
             _baseReportPath = config[ApiConstants.BASEREPORTFOLDER];
@@ -79,6 +84,7 @@ namespace AECI.ICM.Api.Controllers
         {
             HttpResponseMessage response = null;
             request.BMSigPath = BuildSignaturePath(request);
+            request.ReportBasePath = _baseReportPath;
 
             if (!ValidateFilePath(request.BMSigPath))
             {
@@ -93,6 +99,7 @@ namespace AECI.ICM.Api.Controllers
             }
             catch (Exception ex)
             {
+                LogToEventLog(request.BMName, ex.Message, "Error", "High");
                 if (ex is DuplicateEntityException)
                     return StatusCode(500, ex.Message);
             }
@@ -117,7 +124,7 @@ namespace AECI.ICM.Api.Controllers
 
                     var serialised = JsonConvert.SerializeObject(request);
                     var param = new StringContent(serialised, Encoding.UTF8, "application/json");
-
+                   
                     response = await client.PostAsync("api/Print/PrintReport", param);
 
                     if (response.IsSuccessStatusCode)
@@ -130,6 +137,7 @@ namespace AECI.ICM.Api.Controllers
                         byte[] filebytes = System.IO.File.ReadAllBytes(deserialisedPath);
                         var file = Path.GetFileName(path);
 
+                        LogToEventLog(request.BMName, $"{file} created @ {DateTime.Now}" , "Info", "Medium");
                         return File(filebytes, System.Net.Mime.MediaTypeNames.Application.Pdf, file);                      
                     }
                     else
@@ -138,14 +146,20 @@ namespace AECI.ICM.Api.Controllers
                         builder.AppendLine(response.ReasonPhrase);
                         builder.AppendLine("Ensure that print service is running and");
                         builder.AppendLine("the report is not open already");
-            
+
+                        LogToEventLog(
+                            request.BMName, 
+                            $"{builder.ToString()}\nError created @ {DateTime.Now}", 
+                            "Error", "High");
+
                         return null;
                     }
                 }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                LogToEventLog(request.BMName, ex.Message, "Error");
+                return StatusCode(502, ex.Message);
             }
         }
 
@@ -156,6 +170,7 @@ namespace AECI.ICM.Api.Controllers
             try
             {
                 _icmService.Add(entity);
+                LogToEventLog("", $"{entity.Id} created @ {DateTime.Now}", "Info", "Medium");
 
                 return Ok(0);
             }
@@ -197,6 +212,24 @@ namespace AECI.ICM.Api.Controllers
         #endregion
 
         #region Private Methods
+
+        private void LogToEventLog(string user, string message, 
+                    string cat = "Info", 
+                    string importance="Low")
+        {
+            _logger.LogAsync(new EventLogMessage()
+            {
+                Application = "ICM SPA",
+                Category = cat,
+                Comment = "None",
+                Date = DateTime.Now,
+                Id = 1,
+                Importance = importance,
+                Message = $"{message}\nLogged by {user}",
+                Stacktrace = null,
+                User = user
+            });
+        }
 
         private bool ValidateFilePath(string file)
         {

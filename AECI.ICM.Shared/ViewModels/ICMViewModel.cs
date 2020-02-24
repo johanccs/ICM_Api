@@ -1,4 +1,6 @@
-﻿namespace AECI.ICM.Shared.ViewModels
+﻿using AECI.ICM.Shared.Interfaces;
+
+namespace AECI.ICM.Shared.ViewModels
 {
     public class ICMViewModel
     {

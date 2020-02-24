@@ -13,13 +13,13 @@ namespace AECI.ICM.PrintReports.Controllers
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class PrintController : ApiController
-    {   
+    {
         public HttpResponseMessage PrintReport(ResponseViewModel param)
         {
-            var imgPath = @"C:\TestReports\MuchLogo.png";
+            var imgPath = Path.Combine(param.ReportBasePath, "muchlogo.png");
             var ext = "pdf";
 
-            var filePath = CreateFilePath(param, @"C:\TestReports\");
+            var filePath = CreateFilePath(param);
 
             var fileName = CreateFileName(param);
 
@@ -34,7 +34,9 @@ namespace AECI.ICM.PrintReports.Controllers
 
             IDocumentExportEx docEx = new GrapeCity.ActiveReports.Export.Pdf.Section.PdfExport();
             var report = BuildReport(param, imgPath);
-            report.PageSettings.Orientation = GrapeCity.ActiveReports.Document.Section.PageOrientation.Landscape;
+
+            report.PageSettings.Orientation = 
+                GrapeCity.ActiveReports.Document.Section.PageOrientation.Landscape;
 
             report.DataSource = param.ICMElements;
 
@@ -46,9 +48,7 @@ namespace AECI.ICM.PrintReports.Controllers
                 {
                     docEx.Export(report.Document, stream);
                 }
-
-                Logging("Report created");
-
+              
                 return Request.CreateResponse(HttpStatusCode.OK, fullPath);
             }
             catch (Exception ex)
@@ -86,16 +86,14 @@ namespace AECI.ICM.PrintReports.Controllers
         
         private string CreateFileName(ResponseViewModel entity)
         {
-            //Create report filename by taking the Branch + Month + Literal ICMReport;
-
             var result = $"ICMReport_{entity?.Branch}_{entity?.Month}_{DateTime.Now.Year}";
 
             return result;
         }
 
-        private string CreateFilePath(ResponseViewModel param, string currFolderPath)
+        private string CreateFilePath(ResponseViewModel param)
         {
-            var folderPath = Path.Combine(currFolderPath, param.Branch);
+            var folderPath = Path.Combine(param.ReportBasePath, param.Branch);
 
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);

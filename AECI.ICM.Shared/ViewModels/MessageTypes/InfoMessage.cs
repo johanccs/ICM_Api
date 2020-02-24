@@ -1,11 +1,9 @@
-﻿using AECI.ICM.Application.Interfaces;
+﻿using AECI.ICM.Shared.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
-using static AECI.ICM.Application.ApplicationEnums.InfrastructureEnums;
+using static AECI.ICM.Shared.Enums.SharedEnums;
 
-namespace AECI.ICM.Application.Models.MessageTypes
+namespace AECI.ICM.Shared.ViewModels.MessageTypes
 {
     public class InfoMessage:ILogMessageType
     {

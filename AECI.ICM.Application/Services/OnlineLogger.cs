@@ -1,4 +1,4 @@
-﻿using AECI.ICM.Application.Interfaces;
+﻿using AECI.ICM.Shared.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
@@ -12,7 +12,9 @@ namespace AECI.ICM.Application.Services
     {
         #region Methods
 
-        public async Task<bool> LogAsync(ILogMessageType message, string url)
+        public async Task<bool> LogAsync(
+            ILogMessageType message, string src="API", 
+            string url="")
         {
             var _url = url;
 
@@ -51,6 +53,7 @@ namespace AECI.ICM.Application.Services
                throw ex;
             }
         }
+
         #endregion
     }
 }

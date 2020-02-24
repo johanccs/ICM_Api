@@ -1,4 +1,5 @@
 ﻿using AECI.ICM.Application.Interfaces;
+using AECI.ICM.Shared.Interfaces;
 
 namespace AECI.ICM.Application.Commands
 {
@@ -25,6 +26,5 @@ namespace AECI.ICM.Application.Commands
                 public string SystemStatus { get; set; }
             }
         }
-
     }
 }
