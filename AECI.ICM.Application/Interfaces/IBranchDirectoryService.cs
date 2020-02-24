@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AECI.ICM.Data.Context;
+using System.Collections.Generic;
 
 namespace AECI.ICM.Application.Interfaces
 {
@@ -13,5 +14,7 @@ namespace AECI.ICM.Application.Interfaces
         List<string> LocateByFullBranchName(string fullBranchname);
 
         List<IBranch> GetAll();
+
+        List<Data.Entities.Branch> LoadBranches(MapConfigDbCtx mapConfigDb);
     }
 }

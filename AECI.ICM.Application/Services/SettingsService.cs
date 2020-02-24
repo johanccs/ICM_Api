@@ -47,7 +47,6 @@ namespace AECI.ICM.Application.Services
             }
             catch (Exception)
             {
-
                 throw;
             }
         }

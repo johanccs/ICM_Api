@@ -7,5 +7,6 @@
         public const string PRODREPORTAPIURL = "Settings:ProdReportApi";
         public const string SYSTEMSTATUS = "Settings:SystemStatus";
         public const string BASEREPORTFOLDER = "Settings:BaseReportFolder";
+        public const string MAPCONFIGDBCTX = "ConnectionStrings:MapConfigCtx";
     }
 }

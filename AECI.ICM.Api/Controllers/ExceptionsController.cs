@@ -43,9 +43,9 @@ namespace AECI.ICM.Api.Controllers
 
             if(DateTime.Now.Day > cutOffDay)
             {
-                var isException = GetExceptionResult(site);
+                var result = !GetExceptionResult(site);
 
-                return Ok(isException);
+                return Ok(result);
             }
 
             return Ok(false);
@@ -92,16 +92,18 @@ namespace AECI.ICM.Api.Controllers
 
         private bool GetExceptionResult(string site)
         {
-            var monthNo = DateTime.Now.Month;
+            var monthNo = DateTime.Now.AddMonths(-1).Month;
             var results = GetResults(monthNo.ToString());
-          
-            foreach(var result in results)
-            {
-                if (result.Branch == site)
-                    return false;
-            }
 
-            return true;
+            return results.Any(p => p.Branch.ToLower() == site.ToLower());
+          
+            //foreach(var result in results)
+            //{
+            //    if (result.Branch == site)
+            //        return false;
+            //}
+
+            //return true;
         }
 
         private List<ResultEntity> GetExceptions(SettingEntity setting, int monthNo)

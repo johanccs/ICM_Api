@@ -3,7 +3,6 @@ using AECI.ICM.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Threading.Tasks;
 
 namespace AECI.ICM.Api.Controllers
 {

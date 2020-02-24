@@ -56,14 +56,21 @@ namespace AECI.ICM.Api.Controllers
         [HttpPost]
         public IActionResult SaveSetting(SettingsViewModel setting)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest("An error occurred");
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest("An error occurred");
+                }
+
+                _settingsCtx.SaveSettingAsync(MapTo(setting));
+
+                return Ok(0);
             }
-
-            _settingsCtx.SaveSettingAsync(MapTo(setting));
-
-            return Ok(0);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         #endregion
@@ -78,6 +85,7 @@ namespace AECI.ICM.Api.Controllers
             mapped.SignatureLocation = unmapped.SignatureLocation;
             mapped.WarningCuttOffDate = unmapped.WarningCuttOffDate;
             mapped.WarningEmail = unmapped.WarningEmail;
+            mapped.AccountantName = TryBuildAccountNameFromEmail(mapped.WarningEmail);
 
             return mapped;
         }
@@ -114,6 +122,20 @@ namespace AECI.ICM.Api.Controllers
             }
 
             return true;
+        }
+
+        private string TryBuildAccountNameFromEmail(string email)
+        {
+            string nameWithoutDomain = email.Substring(0, email.IndexOf("@"));
+            string[] values = nameWithoutDomain.Split('.');
+
+            var firstName = values[0];
+            var lastName = values[1];
+
+            firstName = char.ToUpper(firstName[0]) + firstName.Substring(1);
+            lastName = char.ToUpper(lastName[0]) + lastName.Substring(1);
+
+            return $"{firstName} {lastName}";
         }
 
         #endregion

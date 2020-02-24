@@ -9,7 +9,7 @@ namespace AECI.ICM.Data.Entities
         public string SignatureLocation { get; set; }
         public bool EnableWarning { get; set; }
         public DateTime WarningCuttOffDate { get; set; }
-        public string WarningEmail { get; set; }
+        public string WarningEmail { get; set; } 
         public string OnlineApiUrl { get; set; }
         public List<SettingEmail> Emails { get; set; } = new List<SettingEmail>();
     }

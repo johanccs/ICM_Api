@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MonitorService.Services;
+using System.Diagnostics;
 
 namespace AECI.Monitor.Test.TestMonitor
 {
@@ -10,8 +11,8 @@ namespace AECI.Monitor.Test.TestMonitor
         public void TestSendEmail()
         {
             var service = new ExceptionMonitor();
-
-            service.Start();
+            var _event = new EventLog();
+            service.Start(_event);
         }
     }
 }

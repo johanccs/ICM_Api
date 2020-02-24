@@ -33,8 +33,10 @@ namespace AECI.ICM.Data.Repository
             try
             {
                 var results =  _ctx.Settings.Include(p => p.Emails).FirstOrDefault();
-                //var results = _ctx.Settings.FirstOrDefault();
 
+                if (results == null)
+                    return new SettingEntity();                
+             
                 return Map(results);
             }
             catch (Exception ex)
@@ -75,17 +77,43 @@ namespace AECI.ICM.Data.Repository
                         throw new ArgumentNullException(nameof(currEntity), 
                             "Entity cannot be null - Update EF Core");
 
-                    mappedEntity.Emails.ForEach(p =>
+                    foreach (var entity in mappedEntity.Emails)
                     {
-                        currEntity.Emails.ForEach(y =>
-                        {
-                            y.BranchManagerEmail = p.BranchManagerEmail;
-                            y.BranchManagerName = p.BranchManagerName;
-                            y.RegionalAccountantEmail = p.RegionalAccountantEmail;
-                            y.RegionalAccountantName = p.RegionalAccountantName;
-                            y.Site = p.Site;
-                        });
-                    });
+                        currEntity.Emails.FirstOrDefault(
+                            p => p.Id == entity.Id &&
+                            p.BranchManagerEmail == entity.BranchManagerEmail)
+                            .BranchManagerEmail = entity.BranchManagerEmail;
+
+                        currEntity.Emails.FirstOrDefault(
+                            p => p.Id == entity.Id &&
+                            p.BranchManagerEmail == entity.BranchManagerEmail)
+                            .BranchManagerName = entity.BranchManagerName;
+
+                        currEntity.Emails.FirstOrDefault(
+                            p => p.Id == entity.Id &&
+                            p.BranchManagerEmail == entity.BranchManagerEmail)
+                            .Id = entity.Id;
+
+                        currEntity.Emails.FirstOrDefault(
+                            p => p.Id == entity.Id &&
+                            p.BranchManagerEmail == entity.BranchManagerEmail)
+                            .RegionalAccountantEmail = entity.RegionalAccountantEmail;
+
+                        currEntity.Emails.FirstOrDefault(
+                            p => p.Id == entity.Id &&
+                            p.BranchManagerEmail == entity.BranchManagerEmail)
+                            .RegionalAccountantName = entity.RegionalAccountantName;
+
+                        currEntity.Emails.FirstOrDefault(
+                            p => p.Id == entity.Id &&
+                            p.BranchManagerEmail == entity.BranchManagerEmail)
+                            .SettingId = entity.SettingId;
+
+                        currEntity.Emails.FirstOrDefault(
+                            p => p.Id == entity.Id &&
+                            p.BranchManagerEmail == entity.BranchManagerEmail)
+                            .Site = entity.Site;
+                    }
 
                     currEntity.EnableWarning = mappedEntity.EnableWarning;
                     currEntity.SignatureLocation = mappedEntity.SignatureLocation;

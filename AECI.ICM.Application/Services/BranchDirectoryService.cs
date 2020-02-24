@@ -1,6 +1,7 @@
 ﻿using AECI.ICM.Application.ApplicationEnums;
 using AECI.ICM.Application.Interfaces;
 using AECI.ICM.Application.Models;
+using AECI.ICM.Data.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace AECI.ICM.Application.Services
         #region Readonly Fields
 
         private readonly List<IBranch> branches;
-
+        
         #endregion
 
         #region Constants
@@ -22,7 +23,7 @@ namespace AECI.ICM.Application.Services
         #endregion
 
         #region Constructor
-
+       
         public BranchDirectoryService()
         {
             branches = LoadBranches();
@@ -31,6 +32,13 @@ namespace AECI.ICM.Application.Services
         #endregion
 
         #region Public Methods
+
+        public List<Data.Entities.Branch> LoadBranches(MapConfigDbCtx mapConfigDb)
+        {
+            var result = mapConfigDb.GetAll();
+
+            return result;
+        }
 
         public string Locate(int siteid)
         {
@@ -97,7 +105,7 @@ namespace AECI.ICM.Application.Services
 
             return branchDir;
         }
-   
+
         private IBranch GetById(object id)
         {
             if (branches.Any(p => p.SiteId == Convert.ToInt32(id)))
