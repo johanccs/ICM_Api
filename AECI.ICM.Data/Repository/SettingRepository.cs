@@ -46,6 +46,20 @@ namespace AECI.ICM.Data.Repository
             }
         }
 
+        public bool GetGMStatus(string site, string email)
+        {
+            var settings = GetAllAsync().Emails.Where(p=>p.Site == site && p.GMEmail == email).ToList();
+
+            return settings.Count > 0;
+        }
+
+        public string GetRegion(string site)
+        {
+            var setting = GetAllAsync().Emails.Where(p => p.Site == site).FirstOrDefault();
+
+            return setting.Region;
+        }
+
         public void SaveSetting(SettingEntity param)
         {
             try
@@ -155,7 +169,11 @@ namespace AECI.ICM.Data.Repository
                     SettingId = settings.Id,
                     RegionalAccountantEmail = p.RegionalAccountantEmail,
                     RegionalAccountantName = p.RegionalAccountantName,
-                    Site = p.Site
+                    Site = p.Site,
+                    Active = p.Active,
+                    GMEmail = p.GMEmail,
+                    GMName = p.GMName,
+                    Region = p.Region           
                 });
             });
 

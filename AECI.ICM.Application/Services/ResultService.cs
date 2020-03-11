@@ -2,6 +2,7 @@
 using AECI.ICM.Domain.Entities;
 using AECI.ICM.Domain.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AECI.ICM.Application.Services
 {
@@ -24,11 +25,23 @@ namespace AECI.ICM.Application.Services
 
         #region Methods
 
-        public IEnumerable<ResultEntity> GetAllAsync()
+        public async Task<IEnumerable<ResultEntity>> GetAllAsync()
         {
-            var results =_resultRepository.GetAllAsync();
+            var results = await _resultRepository.GetAllAsync();
 
             return results;
+        }
+
+        public async Task<IEnumerable<ResultEntity>> GetAllAsync(string region)
+        {
+            var results = await _resultRepository.GetAllAsync(region);
+
+            return results;
+        }
+
+        public Task<bool> Authorise(ResultEntity entity)
+        {
+            return _resultRepository.Authorise(entity);
         }
 
         #endregion

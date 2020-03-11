@@ -8,5 +8,8 @@
         public const string SYSTEMSTATUS = "Settings:SystemStatus";
         public const string BASEREPORTFOLDER = "Settings:BaseReportFolder";
         public const string MAPCONFIGDBCTX = "ConnectionStrings:MapConfigCtx";
+        public const string DEFAULTEMAILSENDER = "Settings:DefaultEmailSender";
+        public const string DEBUGSPA = "Settings:DebugSPA";
+        public const string PRODSPA = "Settings:ProdSPA";
     }
 }

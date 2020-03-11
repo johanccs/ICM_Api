@@ -1,5 +1,4 @@
 ﻿using AECI.ICM.Application.Interfaces;
-using AECI.ICM.Data.Context;
 using AECI.ICM.Domain.Entities;
 using AECI.ICM.Domain.Interfaces;
 using System;
@@ -37,6 +36,16 @@ namespace AECI.ICM.Application.Services
             {
                 throw;
             }
+        }
+
+        public bool GetGMStatus(string branch, string email)
+        {
+            return _settingsRepo.GetGMStatus(branch, email);
+        }
+
+        public string GetRegion(string branch)
+        {
+            return _settingsRepo.GetRegion(branch);
         }
 
         public void SaveSettingAsync(SettingEntity entity)

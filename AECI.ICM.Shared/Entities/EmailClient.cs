@@ -55,6 +55,7 @@ namespace AECI.ICM.Shared.Entities
             {
                 message.Subject = subject;
                 message.Body = body;
+                message.IsBodyHtml = true;
 
                 if (!string.IsNullOrEmpty(cc))
                     message.CC.Add(cc);

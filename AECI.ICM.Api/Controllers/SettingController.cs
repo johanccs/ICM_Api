@@ -1,4 +1,5 @@
 ﻿using AECI.ICM.Api.ViewModels;
+using AECI.ICM.Application.Commands;
 using AECI.ICM.Application.Interfaces;
 using AECI.ICM.Domain.Entities;
 using AECI.ICM.Domain.ValueObjects;
@@ -54,7 +55,7 @@ namespace AECI.ICM.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult SaveSetting(SettingsViewModel setting)
+        public IActionResult SaveSetting(SettingCommand.V1.Save setting)
         {
             try
             {
@@ -76,9 +77,9 @@ namespace AECI.ICM.Api.Controllers
         #endregion
 
         #region Private Methods
-        private SettingsViewModel Map(SettingEntity unmapped)
+        private SettingCommand.V1.Save Map(SettingEntity unmapped)
         {
-            var mapped = new SettingsViewModel();
+            var mapped = new SettingCommand.V1.Save();
             mapped.Id = unmapped.Id.GetId();
             mapped.Emails = unmapped.Emails;
             mapped.EnableWarning = unmapped.EnableWarning;
@@ -90,7 +91,7 @@ namespace AECI.ICM.Api.Controllers
             return mapped;
         }
 
-        private SettingEntity MapTo(SettingsViewModel unmapped)
+        private SettingEntity MapTo(SettingCommand.V1.Save unmapped)
         {
             var mapped = new SettingEntity();
             mapped.Id = new SettingId(unmapped.Id);

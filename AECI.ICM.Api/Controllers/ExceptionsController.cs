@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AECI.ICM.Api.Controllers
 {
@@ -36,16 +37,16 @@ namespace AECI.ICM.Api.Controllers
         #region Methods
 
         [HttpGet("{site}")]
-        public IActionResult Get(string site)
+        public async Task<IActionResult> Get(string site)
         {
             var setting = GetSetting();
             var cutOffDay = setting.WarningCuttOffDate.Day;
 
             if(DateTime.Now.Day > cutOffDay)
             {
-                var result = !GetExceptionResult(site);
+                var result = await GetExceptionResult(site);
 
-                return Ok(result);
+                return Ok(!result);
             }
 
             return Ok(false);
@@ -53,32 +54,39 @@ namespace AECI.ICM.Api.Controllers
 
         [HttpGet]
         [Route("getAll")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var setting = GetSetting();
-            var cutOffDay = setting.WarningCuttOffDate.Day;
-            var monthNo = DateTime.Now.Month;
-
-            if (DateTime.Now.Day > cutOffDay)
+            try
             {
-                var exceptions = GetExceptions(setting, monthNo);
+                var setting = GetSetting();
+                var cutOffDay = setting.WarningCuttOffDate.Day;
+                var monthNo = DateTime.Now.Month;
 
-                return Ok(exceptions);
+                if (DateTime.Now.Day > cutOffDay)
+                {
+                    var exceptions = await GetExceptions(setting, monthNo);
+
+                    return Ok(exceptions);
+                }
+
+                return Ok("Cut off date not in scope yet");
             }
-
-            return Ok();
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet]
         [Route("getByMonthNo/{num}")]
-        public IActionResult GetByMonthNo(int num)
+        public async Task<IActionResult> GetByMonthNo(int num)
         {
             var setting = GetSetting();
             var cutOffDay = setting.WarningCuttOffDate.Day;
 
             if (DateTime.Now.Day > cutOffDay)
             {
-                var exceptions = GetExceptions(setting,num);
+                var exceptions = await GetExceptions(setting,num);
 
                 return Ok(exceptions);
             }
@@ -90,10 +98,10 @@ namespace AECI.ICM.Api.Controllers
 
         #region Private Methods
 
-        private bool GetExceptionResult(string site)
+        private async Task<bool> GetExceptionResult(string site)
         {
             var monthNo = DateTime.Now.AddMonths(-1).Month;
-            var results = GetResults(monthNo.ToString());
+            var results = await GetResults(monthNo.ToString());
 
             return results.Any(p => p.Branch.ToLower() == site.ToLower());
           
@@ -106,15 +114,20 @@ namespace AECI.ICM.Api.Controllers
             //return true;
         }
 
-        private List<ResultEntity> GetExceptions(SettingEntity setting, int monthNo)
+        private async Task<List<ResultEntity>> GetExceptions(SettingEntity setting, int monthNo)
         {
-            var results = GetResults(monthNo.ToString());
+            var results = await GetResults(monthNo.ToString());
             var exceptions = new List<ResultEntity>();
+
+            if (results.Count == 0)
+                return new List<ResultEntity>();
+
             var allBranches = _branchDirectoryService.GetAll();
 
             foreach (var branch in allBranches)
             {
                 var result = results.Any(p => p.Branch == branch.AbbrevName);
+
                 if (!result)
                 {
                     var settingEmail = setting.Emails.FirstOrDefault(p => 
@@ -131,7 +144,7 @@ namespace AECI.ICM.Api.Controllers
 
             return exceptions;
         }
-
+     
         private SettingEntity GetSetting()
         {
             var setting = _settingService.GetAllAsync();
@@ -139,11 +152,11 @@ namespace AECI.ICM.Api.Controllers
             return setting;
         }
 
-        private List<ResultEntity> GetResults(string monthNo)
+        private async Task<List<ResultEntity>> GetResults(string monthNo)
         {
-            var results = _resultService.GetAllAsync().Where(p=>p.Month == monthNo).ToList();
-
-            return results;
+            var results = await _resultService.GetAllAsync();           
+            
+            return results.Where(p => p.Month == monthNo).ToList();
         }
 
         #endregion

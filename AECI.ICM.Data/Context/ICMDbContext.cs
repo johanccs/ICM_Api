@@ -20,7 +20,7 @@ namespace AECI.ICM.Data.Context
         public DbSet<Setting> Settings { get; set; }
         public DbSet<SettingEmail> SettingEmails { get; set; }
         public DbSet<Result> Results { get; set; }
-
+       
         #endregion
 
         #region Methods

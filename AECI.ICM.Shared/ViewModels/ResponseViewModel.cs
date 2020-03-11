@@ -17,6 +17,10 @@ namespace AECI.ICM.Shared.ViewModels
         public string FinName { get; set; }
         public DateTime DateSigned { get; set; }
         public string ReportBasePath { get; set; }
+        public int GMAuthorisedStatus { get; set; }
+        public string GMName { get; set; }
+        public int BMAuthorisedStatus { get; set; }
+        public string Region { get; set; }
         public List<ICMViewModel> ICMElements { get; set; } = new List<ICMViewModel>();
     }
 }

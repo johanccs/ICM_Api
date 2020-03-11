@@ -22,24 +22,23 @@ namespace AECI.ICM.Api.Controllers
 
         private SystemStatusEnum _debug;
         private readonly IBranchDirectoryService _branchDirectoryService;
-        private readonly IConfiguration _config;
-        private readonly ILogger _logger;
+        private readonly IConfiguration _config;        
+        private readonly ISettingsService _settingsService;
 
         #endregion
 
         #region Constructor
 
-        public LoginController(IBranchDirectoryService branchDirectory,
-                               ILogger logger,
+        public LoginController(IBranchDirectoryService branchDirectory,                              
+                               ISettingsService settingsService,
                                IConfiguration config)
         {
             _branchDirectoryService = branchDirectory;            
-            _config = config;
-            _logger = logger;
+            _config = config;         
+            _settingsService = settingsService;
 
             _debug = (SystemStatusEnum)Enum.Parse(typeof(SystemStatusEnum), 
                     _config[ApiConstants.SYSTEMSTATUS]);
-
         }
 
         #endregion
@@ -56,7 +55,8 @@ namespace AECI.ICM.Api.Controllers
                 }
                 var loggedUser = QueryADUser(request.Username);
                 loggedUser = SetSiteAbbreviation(loggedUser);
-               
+                loggedUser.Region = _settingsService.GetRegion(request.Site);
+
                 if (ValidateLoggedUser(loggedUser))
                     return NotFound(0);
 
@@ -78,13 +78,17 @@ namespace AECI.ICM.Api.Controllers
         {
             try
             {
+                LogToEventLog(username, $"{username} - Before QueryAD @ {DateTime.Now}", "Error");
                 var loggedUser = QueryADUser(username);
                 var branches = _branchDirectoryService.LocateByFullBranchName(loggedUser.Site);
+
+                LogToEventLog(username, $"{username} Get method was hit. Branches found: @ {DateTime.Now}", "Error");
 
                 return Ok(branches);
             }
             catch (Exception ex)
             {
+                LogToEventLog(username, $"{ex.Message}: @ {DateTime.Now}", "Error");
                 return BadRequest(ex.Message);
             }
         }
@@ -93,26 +97,29 @@ namespace AECI.ICM.Api.Controllers
 
         private void LogToEventLog(string user, string message, string cat = "Info")
         {
-            _logger.LogAsync(new EventLogMessage()
-            {
-                Application = "ICM SPA",
-                Category = cat,
-                Comment = "None",
-                Date = DateTime.Now,
-                Id = 1,
-                Importance = "High",
-                Message = message,
-                Stacktrace = null,
-                User = user
-            });
+            //_logger.LogAsync(new EventLogMessage()
+            //{
+            //    Application = "ICM SPA",
+            //    Category = cat,
+            //    Comment = "None",
+            //    Date = DateTime.Now,
+            //    Id = 1,
+            //    Importance = "High",
+            //    Message = message,
+            //    Stacktrace = null,
+            //    User = user
+            //});
+
+            var errorFile = @"C:\TestReports\Exceptions\Exceptions.txt";
+            System.IO.File.AppendAllText(errorFile, message + "\n");
         }
 
         private void LogToOnlineApi(Login.V1.Login request, string message)
         {
-            _logger.LogAsync(new InfoMessage().Set(
-                      $"{message} {DateTime.Now}",
-                      request.Site, request.Username
-                ), "http://madev04:8081");
+            //_logger.LogAsync(new InfoMessage().Set(
+            //          $"{message} {DateTime.Now}",
+            //          request.Site, request.Username
+            //    ), "http://madev04:8081");
         }
 
         private ILoginCommand SetSiteAbbreviation(ILoginCommand loggedUser)
@@ -167,7 +174,8 @@ namespace AECI.ICM.Api.Controllers
                                 user.ADUser = sr.Properties["samaccountname"][0].ToString();
                                 user.Email = sr.Properties["mail"][0].ToString();
                                 user.Username = sr.Properties["samaccountname"][0].ToString();
-                                user.DisplayName = sr.Properties["displayname"][0].ToString();
+                                user.DisplayName = sr.Properties["displayname"][0].ToString();                                
+                                user.IsGM = sr.Properties["title"][0].ToString().ToLower() == "General Manager".ToLower();
                                 user.SystemStatus = _debug.ToString();
 
                             if (sr.Properties["office"].Count > 0)
@@ -185,7 +193,7 @@ namespace AECI.ICM.Api.Controllers
                 {
                     ADUser = "mrma86423",
                     DisplayName = "Johan Potgieter",
-                    Email = "johan.ccs@gmail.com",
+                    Email = "johan1.potgieter@muchasphalt.com",
                     Site = "Head Office",
                     Username = "mrma86423",
                     SystemStatus = SystemStatusEnum.Debug.ToString(),
@@ -193,8 +201,9 @@ namespace AECI.ICM.Api.Controllers
 
                 return exception;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogToEventLog(username, $"{ex.Message}: @ {DateTime.Now}", "Error");
                 throw;
             }
         }

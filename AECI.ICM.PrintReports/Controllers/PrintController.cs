@@ -58,6 +58,12 @@ namespace AECI.ICM.PrintReports.Controllers
             }
         }
 
+       [HttpGet]
+        public bool Heartbeat()
+        {
+            return true;
+        }
+
         private arICM BuildReport(ResponseViewModel param, string imgPath)
         {
             var report = new arICM();

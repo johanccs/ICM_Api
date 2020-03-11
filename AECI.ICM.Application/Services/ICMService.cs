@@ -39,6 +39,11 @@ namespace AECI.ICM.Application.Services
         {
             try
             {
+                if (entity.BMAuthorisedStatus == 0)
+                {
+                    entity.BMAuthorisedStatus = 1;
+                    entity.GMAuthorisedStatus = 0;
+                }
                 _icmRepository.Add(Map(entity));
             }            
             catch (System.Exception)
@@ -66,6 +71,10 @@ namespace AECI.ICM.Application.Services
             mapped.DateSigned = unmapped.DateSigned;
             mapped.FinName = unmapped.FinName;
             mapped.Month = unmapped.Month;
+            mapped.BMAuthorisedStatus = unmapped.BMAuthorisedStatus;
+            mapped.GMAuthorisedStatus = unmapped.GMAuthorisedStatus;
+            mapped.Region = unmapped.Region;
+            mapped.GMName = unmapped.GMName;
             //mapped.RegionalACC = unmapped.RegionalAcc;
 
             return mapped;

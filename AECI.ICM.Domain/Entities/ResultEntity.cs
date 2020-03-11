@@ -12,5 +12,9 @@ namespace AECI.ICM.Domain.Entities
         public string FinName { get; set; }
         //public string RegionalACC { get; set; }
         public DateTime DateSigned { get; set; }
+        public int GMAuthorisedStatus { get; set; }
+        public int BMAuthorisedStatus { get; set; }
+        public string GMName { get; set; }
+        public string Region { get; set; }
     }
 }

@@ -51,6 +51,7 @@ namespace MonitorService.Services
         {
             try
             {
+                //Debugger.Break();
                 _eventLog = eventLog;
                 _currSetting = GetSetting();
                 var cuttOffDay = _currSetting.WarningCuttOffDate.Day;
@@ -58,12 +59,16 @@ namespace MonitorService.Services
                 if (DateTime.Now.Day > cuttOffDay)
                 {
                     var outstandingSites = CheckOutstandingSites();
-                    if (SendNotificationToAccountant(outstandingSites))
-                        SendNotificationToBranchManagers(outstandingSites);
 
-                    WriteLogToEventViewer(
-                        "Start method completed. See Log entries for individual messages",
-                        "Exception Monitor Start");
+                    if (outstandingSites.Count > 0)
+                    {
+                        if (SendNotificationToAccountant(outstandingSites))
+                            SendNotificationToBranchManagers(outstandingSites);
+
+                        WriteLogToEventViewer(
+                            "Start method completed. See Log entries for individual messages",
+                            "Exception Monitor Start");
+                    }
                 }
             }
             catch (Exception)
@@ -149,14 +154,14 @@ namespace MonitorService.Services
                 _notificationService.Send(mailMessages);
 
                 WriteLogToEventViewer(
-                    "Email sent successfully", 
-                    "SendNotificationToBranchManagers");
+                    "Email sent successfully",
+                    "SendNotificationToAccountant");
 
                 return true;
             }
             catch (Exception ex)
             {
-                WriteLogToEventViewer(ex, "SendNotificationToBranchManagers");
+                WriteLogToEventViewer(ex, "SendNotificationToAccountant");
                 throw;
             }
         }

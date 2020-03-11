@@ -12,5 +12,9 @@ namespace AECI.ICM.Data.Entities
         public string FinanceName { get; set; }
         //public string RegionalAccountantName { get; set; }
         public DateTime DateSigned { get; set; }
+        public int GMAuthorisedStatus { get; set; }
+        public int BMAuthorisedStatus { get; set; }
+        public string Region { get; set; }
+        public string GMName { get; set; }
     }
 }

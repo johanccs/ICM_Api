@@ -93,7 +93,6 @@ namespace AECI.ICM.Data.Repository
                     currICM.FinanceFunctionCheck = entity.FinanceFunctionCheck;
                     currICM.RegionalAccountant = entity.RegionalAccountant;
 
-
                     currICM.SectionDetail.Section = entity.Section;
                     currICM.SectionDetail.SectionName = entity.SectionName;
 
@@ -143,6 +142,10 @@ namespace AECI.ICM.Data.Repository
             mapped.DateSigned = source.DateSigned;
             mapped.FinanceName = source.FinName;
             mapped.Month = source.Month;
+            mapped.GMAuthorisedStatus = source.GMAuthorisedStatus;
+            mapped.BMAuthorisedStatus = source.BMAuthorisedStatus;
+            mapped.Region = source.Region;
+            mapped.GMName = source.GMName;
             //mapped.RegionalAccountantName = source.RegionalACC;
 
             return mapped;

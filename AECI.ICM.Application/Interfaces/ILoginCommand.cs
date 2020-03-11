@@ -17,5 +17,9 @@
         string Role { get; set; }
 
         string SystemStatus { get; set; }
+
+        string Region { get; set; }
+
+        bool IsGM { get; set; }
     }
 }

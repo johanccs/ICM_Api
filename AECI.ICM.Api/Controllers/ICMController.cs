@@ -2,9 +2,7 @@
 using AECI.ICM.Application.Interfaces;
 using AECI.ICM.Data.DataExceptions;
 using AECI.ICM.Domain.Interfaces;
-using AECI.ICM.Shared.Interfaces;
 using AECI.ICM.Shared.ViewModels;
-using AECI.ICM.Shared.ViewModels.MessageTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -26,8 +24,7 @@ namespace AECI.ICM.Api.Controllers
         private readonly IICMService _icmService;
         private readonly INotificationService _notificationService;
         private readonly ISettingsService _settingsService;
-        private readonly IConfiguration _config;
-        private readonly ILogger _logger;
+        private readonly IConfiguration _config;      
         private readonly string _systemStatus;
         private readonly string _smtp;
        
@@ -36,6 +33,7 @@ namespace AECI.ICM.Api.Controllers
         #region Fields
 
         private string _baseReportPath;
+        private string _defaultEmailSender;
 
         #endregion
 
@@ -43,18 +41,17 @@ namespace AECI.ICM.Api.Controllers
 
         public ICMController(IICMService icmService, 
                              INotificationService notificationService,
-                             IConfiguration config,
-                             ILogger logger,
+                             IConfiguration config,                          
                              ISettingsService settingsService)
         {
             _icmService = icmService;
             _notificationService = notificationService;
-            _config = config;
-            _logger = logger;
+            _config = config;         
             _settingsService = settingsService;
             _systemStatus = _config[ApiConstants.SYSTEMSTATUS];
             _baseReportPath = config[ApiConstants.BASEREPORTFOLDER];
             _smtp = config[ApiConstants.SMTPServer];
+            _defaultEmailSender = config[ApiConstants.DEFAULTEMAILSENDER];
         }
 
         #endregion
@@ -96,6 +93,7 @@ namespace AECI.ICM.Api.Controllers
             try
             {
                 _icmService.Add(request);
+                LogToEventLog(request.BMName, $"{request.BMName} logged an ICM Result", "Info", "Medium");
             }
             catch (Exception ex)
             {
@@ -133,6 +131,7 @@ namespace AECI.ICM.Api.Controllers
                         var deserialisedPath = JsonConvert.DeserializeObject<string>(path);
 
                         EmailReport(deserialisedPath, request.Branch);
+                        EmailReport(request.Region, request.Branch, true);
 
                         byte[] filebytes = System.IO.File.ReadAllBytes(deserialisedPath);
                         var file = Path.GetFileName(path);
@@ -148,8 +147,8 @@ namespace AECI.ICM.Api.Controllers
                         builder.AppendLine("the report is not open already");
 
                         LogToEventLog(
-                            request.BMName, 
-                            $"{builder.ToString()}\nError created @ {DateTime.Now}", 
+                            request.BMName,
+                            $"{builder.ToString()}\nError created @ {DateTime.Now}",
                             "Error", "High");
 
                         return null;
@@ -213,22 +212,25 @@ namespace AECI.ICM.Api.Controllers
 
         #region Private Methods
 
-        private void LogToEventLog(string user, string message, 
-                    string cat = "Info", 
-                    string importance="Low")
+        private void LogToEventLog(string user, string message,
+                    string cat = "Info",
+                    string importance = "Low")
         {
-            _logger.LogAsync(new EventLogMessage()
-            {
-                Application = "ICM SPA",
-                Category = cat,
-                Comment = "None",
-                Date = DateTime.Now,
-                Id = 1,
-                Importance = importance,
-                Message = $"{message}\nLogged by {user}",
-                Stacktrace = null,
-                User = user
-            });
+            //_logger.LogAsync(new EventLogMessage()
+            //{
+            //    Application = "ICM SPA",
+            //    Category = cat,
+            //    Comment = "None",
+            //    Date = DateTime.Now,
+            //    Id = 1,
+            //    Importance = importance,
+            //    Message = $"{message}\nLogged by {user}",
+            //    Stacktrace = null,
+            //    User = user
+            //});
+
+            var errorFile = @"C:\TestReports\Exceptions\Exceptions.txt";
+            System.IO.File.AppendAllText(errorFile, message + "\n");
         }
 
         private bool ValidateFilePath(string file)
@@ -338,6 +340,29 @@ namespace AECI.ICM.Api.Controllers
             return finsigPath;
         }
 
+        private bool EmailReport(string region, string site, bool @override)
+        {
+            try
+            {
+                var setting = _settingsService.GetAllAsync();
+                var mailTo = setting.Emails.FirstOrDefault(p => p.Region == region).GMEmail;
+
+                _notificationService.Body = BuildBody(site,true);
+                _notificationService.From = _defaultEmailSender;
+                _notificationService.Server = _smtp;
+                _notificationService.Subject = $"ICM report - {DateTime.Now.ToShortDateString()}";
+                _notificationService.To = mailTo;                
+               
+                _notificationService.Send();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private bool EmailReport(string reportPath, string site)
         {
             try
@@ -346,7 +371,7 @@ namespace AECI.ICM.Api.Controllers
                 var mailTo = setting.Emails.FirstOrDefault(p => p.Site == site).BranchManagerEmail;
 
                 _notificationService.Body = BuildBody(site);
-                _notificationService.From = "muchreply@muchasphalt.com";
+                _notificationService.From = _defaultEmailSender;
                 _notificationService.Server =_smtp;
                 _notificationService.Subject = $"ICM report - {DateTime.Now.ToShortDateString()}";
                 _notificationService.To = mailTo;
@@ -371,8 +396,35 @@ namespace AECI.ICM.Api.Controllers
             sb.AppendLine("Please find the ICM report as attachment");
             sb.AppendLine($"Site: {site}");
             sb.AppendLine($"Date: {DateTime.Now.ToString("dd/MM/yyyy")}");
+            sb.AppendLine("");
+            sb.AppendLine("");            
 
             return sb.ToString();
+        }
+
+        private string BuildBody(string site, bool @gmOverride)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Please find the ICM report as attachment");
+            sb.AppendLine($"Site: {site}");
+            sb.AppendLine($"Date: {DateTime.Now.ToString("dd/MM/yyyy")}");
+            sb.AppendLine("");
+            sb.AppendLine("");
+            sb.AppendLine("\n");
+            sb.AppendLine(
+                $"<a href='{GetSystemStatus()}'>Click here to authorise</a>"
+            );
+
+            return sb.ToString();
+        }
+
+        private string GetSystemStatus()
+        {
+            if (_systemStatus.ToLower() == "debug".ToLower() ||
+                _systemStatus.ToLower() == "Test".ToLower())
+                return _config[ApiConstants.DEBUGSPA].ToString();
+            else
+                return _config[ApiConstants.PRODSPA].ToString();
         }
 
         #endregion

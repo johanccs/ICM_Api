@@ -24,6 +24,10 @@ namespace AECI.ICM.Application.Commands
                 public string Role { get; set; }
 
                 public string SystemStatus { get; set; }
+
+                public string Region { get; set; }
+
+                public bool IsGM { get; set; }
             }
         }
     }
